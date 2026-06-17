@@ -123,7 +123,11 @@
             <div class="contact-info">
                 <span>📞 021 0813 5646 </span> | 
                 <span>✉️ <a href="mailto:christian.ellis245@icloud.com">christian.ellis245@icloud.com</a></span> | 
-                <span>🔗 <a href="https://www.linkedin.com/in/cjellisnz" target="_blank">linkedin.com/in/cjellisnz</a></span>
+                <span>🔗 <a href="https://www.linkedin.com/in/cjellisnz" target="_blank">linkedin.com/in/cjellisnz</a>
+                <div class="counter-container" style="text-align: center; margin-top: 15px; font-size: 0.9em; color: #666;">
+    👁️ Resume Views: <span id="visitor-count" style="font-weight: bold; color: var(--accent-color);">Loading...</span>
+</div>
+                </span>
             </div>
         </header>
 
@@ -294,6 +298,28 @@
             <p>Available on request</p>
         </section>
     </div>
+<script>
+    async function getResumeCounter() {
+        try {
+            // Azure Static Web Apps routes your api folder automatically to /api/
+            const response = await fetch('/api/GetResumeCounter');
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            // Update the HTML with the count from container1
+            document.getElementById('visitor-count').textContent = data.count;
+        } catch (error) {
+            console.error("Failed to fetch page count:", error);
+            document.getElementById('visitor-count').textContent = "Unavailable";
+        }
+    }
 
+    // Call the function as soon as the page finishes loading
+    document.addEventListener('DOMContentLoaded', getResumeCounter);
+</script>
 </body>
 </html>
