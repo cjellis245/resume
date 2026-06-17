@@ -1,9 +1,299 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Christian Ellis - Resume</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --text-color: #333;
+            --bg-color: #f9f9f9;
+            --container-bg: #fff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: var(--container-bg);
+            padding: 40px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+
+        header {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            color: var(--primary-color);
+            font-size: 2.5em;
+        }
+
+        .contact-info {
+            margin-top: 10px;
+            font-size: 1em;
+            color: var(--secondary-color);
+        }
+
+        .contact-info a {
+            color: var(--accent-color);
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        .contact-info a:hover {
+            text-decoration: underline;
+        }
+
+        section {
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .job, .education-item {
+            margin-bottom: 20px;
+        }
+
+        .job-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 10px;
+        }
+
+        .job-title {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: var(--secondary-color);
+        }
+
+        .job-date {
+            font-style: italic;
+            color: #666;
+        }
+
+        ul {
+            margin-top: 5px;
+            padding-left: 20px;
+        }
+
+        ul li {
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                padding: 20px;
+            }
+            .job-header {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
 <body>
 
-<h1>Resume</h1>
-<p>I'll start it eventually lol</p>
+    <div class="container">
+        <header>
+            <h1>Christian Ellis [cite: 1]</h1>
+            <div class="contact-info">
+                <span>📞 021 0813 5646 [cite: 1]</span> | 
+                <span>✉️ <a href="mailto:christian.ellis245@icloud.com">christian.ellis245@icloud.com</a> [cite: 1]</span> | 
+                <span>🔗 <a href="https://www.linkedin.com/in/cjellisnz" target="_blank">linkedin.com/in/cjellisnz</a> [cite: 1]</span>
+            </div>
+        </header>
+
+        <section id="personal-statement">
+            <h2>Personal Statement</h2>
+            <p>"I am a team player who enjoys the challenge of troubleshooting and fixing technical issues. I am very tech-savvy and passionate about keeping up to date with the latest technologies to enable continuous learning. I can learn new things pretty quickly, understand instructions and work well under pressure. I believe that my ideal job is one where it doesn’t feel like work at all, where I am passionate and successful and the people work together harmoniously." [cite: 1]</p>
+        </section>
+
+        <section id="experience">
+            <h2>Experience</h2>
+
+            <div class="job">
+                <div class="job-header">
+                    <span class="job-title">Customer Champion - One New Zealand [cite: 1]</span>
+                    <span class="job-date">OCTOBER 2024 - PRESENT [cite: 1]</span>
+                </div>
+                <ul>
+                    <li>Taking payments and performing account administration. [cite: 1]</li>
+                    <li>Selling phones, cellular plans and broadband [cite: 1]</li>
+                    <li>Resolving issues with customers' devices, home internet or account issues. [cite: 1]</li>
+                    <li>Business to business solutions (Fibre, Wireless broadband, cellular plans) [cite: 1]</li>
+                </ul>
+            </div>
+
+            <div class="job">
+                <div class="job-header">
+                    <span class="job-title">Claims Care Advisor - Youi NZ [cite: 1]</span>
+                    <span class="job-date">AUGUST 2022 - JUNE 2024 [cite: 1]</span>
+                </div>
+                <ul>
+                    <li>Taking calls from customers reaching out after an insured event [cite: 1]</li>
+                    <li>Helping customers through the process of lodging a claim [cite: 1]</li>
+                    <li>Troubleshooting and finding the best solution and outcome for our customers [cite: 1]</li>
+                    <li>Making the claims experience easy, positive and memorable for our customers [cite: 1]</li>
+                    <li>Meeting targets, KPIs and set goals - I was one of the top earners in our department within the first three months. [cite: 1]</li>
+                    <li>Almost never missed a day (very good leave record), compliant with regulations and learnt to use Summit (internal claims software) very quickly. [cite: 1]</li>
+                </ul>
+            </div>
+
+            <div class="job">
+                <div class="job-header">
+                    <span class="job-title">Administrator - Waikato DHB (Covid Directorate), Hamilton [cite: 1]</span>
+                    <span class="job-date">FEBRUARY 2022 - AUGUST 2022 [cite: 1]</span>
+                </div>
+                <ul>
+                    <li>Taking calls from health consumers across the region and dealing with issues concerning covid isolation, vaccinations/tests, welfare and COVID cases, and following up missing info/data. [cite: 1]</li>
+                    <li>Administrative work including using the National Contact Tracing Solution (Salesforce) and other national Covid solutions, as well as internal patient management programs such as Patient Manager, Clinical workstation, and EpiSurv. [cite: 1]</li>
+                    <li>Use and manipulation of data in Excel to manage Covid patients and ensure they have a GP or allocate one to look after them during their isolation. [cite: 1]</li>
+                </ul>
+            </div>
+
+            <div class="job">
+                <div class="job-header">
+                    <span class="job-title">Technician - Mad Click, Te Rapa [cite: 1]</span>
+                    <span class="job-date">JUNE 2021 – JAN 2022 [cite: 1]</span>
+                </div>
+                <ul>
+                    <li>Website and online store design/management for business. [cite: 1]</li>
+                    <li>Large variety of hardware and software troubleshooting and repairs on phones, laptops, desktops, consoles, printers and a range of other devices [cite: 1]</li>
+                    <li>Repairing/replacing phone screens and batteries and various other computer repairs [cite: 1]</li>
+                    <li>Building PCs [cite: 1]</li>
+                    <li>Handling money and EFTPOS transactions [cite: 1]</li>
+                    <li>Managing other technicians and giving them tasks/jobs [cite: 1]</li>
+                </ul>
+            </div>
+
+            <div class="job">
+                <div class="job-header">
+                    <span class="job-title">Slingshot Sales Rep - Chameleon Customer Contact, Waikato [cite: 1]</span>
+                    <span class="job-date">MARCH 2021 - JUNE 2021 [cite: 1]</span>
+                </div>
+                <ul>
+                    <li>Selling Broadband/Home phone products [cite: 1]</li>
+                    <li>Managing my own leads and following up with appointments [cite: 1]</li>
+                    <li><em>Contact:</em> Piyush - Team Sales Manager – 022 583 4710 [cite: 1]</li>
+                </ul>
+            </div>
+
+            <div class="job">
+                <div class="job-header">
+                    <span class="job-title">Crew Member - McDonald’s, Rototuna (Hamilton) [cite: 1]</span>
+                    <span class="job-date">NOVEMBER 2020 - MARCH 2021 [cite: 1]</span>
+                </div>
+                <ul>
+                    <li>Cooking and preparing fresh food [cite: 1]</li>
+                    <li>Taking customer orders and running drive thru [cite: 1]</li>
+                    <li>Keeping the restaurant clean and tidy [cite: 1]</li>
+                </ul>
+            </div>
+
+            <div class="job">
+                <div class="job-header">
+                    <span class="job-title">Sales Consultant - Noel Leeming, Cambridge [cite: 1]</span>
+                    <span class="job-date">MARCH 2020 - JULY 2020 [cite: 1]</span>
+                </div>
+                <ul>
+                    <li>Handling cash and EFTPOS transactions, keeping the store tidy and organised, invoicing and customer phone calls, retail sales. [cite: 1]</li>
+                </ul>
+            </div>
+
+            <div class="job">
+                <div class="job-header">
+                    <span class="job-title">Senior Technician - TechWorx, Cambridge [cite: 1]</span>
+                    <span class="job-date">JULY 2019 - APRIL 2020 [cite: 1]</span>
+                </div>
+                <ul>
+                    <li>Website and online store design/management for business. [cite: 1]</li>
+                    <li>Managing Payroll and staff timesheets, business expenses and invoicing customers through accounting software (Xero) and general accounting upkeep (GST, PAYE, etc) [cite: 1]</li>
+                    <li>Large variety of hardware and software troubleshooting and repairs on phones, laptops, desktops, consoles, printers and a range of other devices [cite: 1]</li>
+                    <li>Home visits to local businesses and consumers for repairs and networking configurations [cite: 1]</li>
+                    <li>Handling money and EFTPOS transactions [cite: 1]</li>
+                    <li>Managing other technicians and giving them tasks/jobs [cite: 1]</li>
+                    <li>In store customer service, managing consumer/business leads and using a CRM to manage jobs and customer/business contacts [cite: 1]</li>
+                </ul>
+            </div>
+
+            <div class="job">
+                <div class="job-header">
+                    <span class="job-title">Vodafone Field Sales Senior Consultant - Chameleon Customer Contact, Waikato [cite: 1]</span>
+                    <span class="job-date">APRIL 2019 - JULY 2019 [cite: 1]</span>
+                </div>
+                <ul>
+                    <li>Selling Broadband/Home phone products in a D2D B2C environment [cite: 1]</li>
+                    <li>Managing my own leads and following up with appointments [cite: 1]</li>
+                    <li><em>Contact:</em> Piyush - Team Sales Manager – 022 583 4710 [cite: 1]</li>
+                </ul>
+            </div>
+
+            <div class="job">
+                <div class="job-header">
+                    <span class="job-title">Crew Member - McDonald’s, Te Awamutu [cite: 1]</span>
+                    <span class="job-date">AUGUST 2018 - APRIL 2019 [cite: 1]</span>
+                </div>
+                <ul>
+                    <li>Cooking and preparing fresh food [cite: 1]</li>
+                    <li>Taking customer orders and running drive thru [cite: 1]</li>
+                    <li>Keeping the restaurant clean and tidy [cite: 1]</li>
+                    <li><em>Contact:</em> Bernie Marshall or Cheryl Rowland (Restaurant Managers) – 07 870 2044 [cite: 1]</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="education">
+            <h2>Education & Qualifications</h2>
+            <div class="education-item">
+                <div class="job-header">
+                    <span class="job-title">CompTIA A+ Certified [cite: 1]</span>
+                    <span class="job-date">2025 [cite: 1]</span>
+                </div>
+            </div>
+            
+            <div class="education-item">
+                <div class="job-header">
+                    <span class="job-title">Fairfield College, Hamilton — NCEA Level 2 [cite: 1]</span>
+                    <span class="job-date">2013 - 2018 [cite: 1]</span>
+                </div>
+            </div>
+
+            <div class="education-item">
+                <div class="job-header">
+                    <span class="job-title"><em>In Progress:</em> CompTIA Network+ [cite: 1]</span>
+                </div>
+            </div>
+        </section>
+
+        <section id="referees">
+            <h2>Referees</h2>
+            <p>Available on request [cite: 2, 3]</p>
+        </section>
+    </div>
 
 </body>
 </html>
