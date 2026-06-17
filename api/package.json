@@ -1,0 +1,8 @@
+{
+  "name": "azure-resume-counter-api",
+  "version": "1.0.0",
+  "description": "Backend API for fetching Cosmos DB page views",
+  "dependencies": {
+    "@azure/cosmos": "^4.2.0"
+  }
+}
