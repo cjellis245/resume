@@ -354,10 +354,10 @@
     </div>
 
     <script>
-        // 1. Target your original relative route for lifetime hits
-        const ORIGINAL_COUNTER_URL = '/api/GetResumeCounter';
+        // 1. FIXED: Pointing this directly to the absolute URL on your new Azure backend
+        const ORIGINAL_COUNTER_URL = 'https://resumelive-fvffb3ckb2hubpg0.centralus-01.azurewebsites.net/api/GetResumeCounter';
 
-        // 2. Updated target URL for your brand new standalone live pipeline app
+        // 2. Target URL for your standalone live pipeline app
         const REALTIME_API_URL = 'https://resumelive-fvffb3ckb2hubpg0.centralus-01.azurewebsites.net/api';
 
         // Configure the streaming WebSockets pipeline client
@@ -376,7 +376,7 @@
 
         // Combined orchestrator running cleanly on document load
         async function runResumePipelines() {
-            // --- PIPELINE A: LOCAL TOTAL VIEWS COUNTER ---
+            // --- PIPELINE A: TOTAL VIEWS COUNTER ---
             try {
                 const response = await fetch(ORIGINAL_COUNTER_URL);
                 if (!response.ok) throw new Error(`Status: ${response.status}`);
