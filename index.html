@@ -353,58 +353,33 @@
         </section>
     </div>
 
-    <script>
-        // 1. FIXED: Pointing this directly to the absolute URL on your new Azure backend
-        const ORIGINAL_COUNTER_URL = 'https://resumelive-fvffb3ckb2hubpg0.centralus-01.azurewebsites.net/api/GetResumeCounter';
+ <script>
+(function () {
+  const sid = (crypto.randomUUID && crypto.randomUUID()) ||
+              (Date.now() + '-' + Math.random().toString(36).slice(2));
+  const totalEl = document.getElementById('total-viewers');
+  const liveEl = document.getElementById('live-viewers');
 
-        // 2. Target URL for your standalone live pipeline app
-        const REALTIME_API_URL = 'https://resumelive-fvffb3ckb2hubpg0.centralus-01.azurewebsites.net/api';
+  // Count this visit once per tab
+  const method = sessionStorage.getItem('counted') ? 'GET' : 'POST';
+  sessionStorage.setItem('counted', '1');
+  fetch('/api/views', { method })
+    .then(r => r.json())
+    .then(d => { if (totalEl && d.total != null) totalEl.textContent = d.total; })
+    .catch(() => {});
 
-        // Configure the streaming WebSockets pipeline client
-        const connection = new signalR.HubConnectionBuilder()
-            .withUrl(REALTIME_API_URL) 
-            .withAutomaticReconnect()
-            .build();
-
-        // Listen for live counts arriving from your standalone backend
-        connection.on('updateActiveCount', (count) => {
-            const activeCounterElement = document.getElementById('active-count');
-            if (activeCounterElement) {
-                activeCounterElement.textContent = count;
-            }
-        });
-
-        // Combined orchestrator running cleanly on document load
-        async function runResumePipelines() {
-            // --- PIPELINE A: TOTAL VIEWS COUNTER ---
-            try {
-                const response = await fetch(ORIGINAL_COUNTER_URL);
-                if (!response.ok) throw new Error(`Status: ${response.status}`);
-                
-                const data = await response.json();
-                document.getElementById('visitor-count').textContent = data.count;
-            } catch (error) {
-                console.error("Original counter failed to load:", error);
-                document.getElementById('visitor-count').textContent = "Unavailable";
-            }
-
-            // --- PIPELINE B: EXTERNAL SIGNALR REAL-TIME TRACKER ---
-            try {
-                await connection.start();
-                console.log("Real-time pipeline active!");
-                await fetch(`${REALTIME_API_URL}/JoinPage`, { method: 'POST' });
-            } catch (err) {
-                console.error("SignalR engine connection failed:", err);
-            }
-        }
-
-        // Send a beacon trigger to drop count by 1 instantly as the user closes tab
-        window.addEventListener('beforeunload', () => {
-            navigator.sendBeacon(`${REALTIME_API_URL}/LeavePage`);
-        });
-
-        // Initialize execution hook
-        document.addEventListener('DOMContentLoaded', runResumePipelines);
-    </script>
+  function ping() {
+    fetch('/api/heartbeat?sid=' + encodeURIComponent(sid), { method: 'POST' })
+      .then(r => r.json())
+      .then(d => { if (liveEl && d.live != null) liveEl.textContent = d.live; })
+      .catch(() => {});
+  }
+  ping();
+  setInterval(ping, 10_000);
+  window.addEventListener('beforeunload', () => {
+    navigator.sendBeacon('/api/heartbeat?sid=' + encodeURIComponent(sid) + '&leave=1');
+  });
+})();
+</script>
 </body>
 </html>
