@@ -357,8 +357,8 @@
 (function () {
   const sid = (crypto.randomUUID && crypto.randomUUID()) ||
               (Date.now() + '-' + Math.random().toString(36).slice(2));
-  const totalEl = document.getElementById('total-viewers');
-  const liveEl = document.getElementById('live-viewers');
+  const totalEl = document.getElementById('visitor-count');
+  const liveEl = document.getElementById('active-count');
 
   // Count this visit once per tab
   const method = sessionStorage.getItem('counted') ? 'GET' : 'POST';
