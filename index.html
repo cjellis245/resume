@@ -61,15 +61,49 @@
             text-decoration: underline;
         }
 
+        /* Flex Wrapper to keep both badges side-by-side */
+        .counters-wrapper {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap; 
+        }
+
+        /* Shared layout for both counter badges */
         .counter-container {
             text-align: center;
-            margin-top: 15px;
             font-size: 0.95em;
             color: #555;
             background: #f0f4f8;
-            display: inline-block;
+            display: flex;
+            align-items: center;
+            gap: 8px;
             padding: 6px 16px;
             border-radius: 20px;
+        }
+
+        /* Real-time badge border accent */
+        .live-badge {
+            border: 1px solid rgba(46, 204, 113, 0.3);
+            background: #f4faf6;
+        }
+
+        /* The green live indicator circle */
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #2ecc71;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse-animation 1.8s infinite ease-in-out;
+        }
+
+        /* Continuous glowing pulse keyframes */
+        @keyframes pulse-animation {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(46, 204, 113, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
         }
 
         section {
@@ -139,17 +173,15 @@
             </div>
             <div>
                 <div class="counters-wrapper">
-    
-    <div class="counter-container">
-        👁️ Total Views: <span id="visitor-count" style="font-weight: bold; color: #34495e;">Loading...</span>
-    </div>
-    
-    <div class="counter-container live-badge">
-        <span class="pulse-dot"></span>
-        <span>Live Viewers: <span id="active-count" style="font-weight: bold; color: #2ecc71;">0</span></span>
-    </div>
-
-</div>
+                    <div class="counter-container">
+                        👁️ Total Views: <span id="visitor-count" style="font-weight: bold; color: #34495e;">Loading...</span>
+                    </div>
+                    
+                    <div class="counter-container live-badge">
+                        <span class="pulse-dot"></span>
+                        <span>Live Viewers: <span id="active-count" style="font-weight: bold; color: #2ecc71;">0</span></span>
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -322,63 +354,57 @@
     </div>
 
     <script>
-        async function getResumeCounter() {
-            try {
-                const response = await fetch('/api/GetResumeCounter');
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP Error Status: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                document.getElementById('visitor-count').textContent = data.count;
-            } catch (error) {
-                console.error("Failed to fetch page count from API:", error);
-                document.getElementById('visitor-count').textContent = "Unavailable";
-            }
-        }
+        // 1. Target your original relative route for lifetime hits
+        const ORIGINAL_COUNTER_URL = '/api/GetResumeCounter';
 
-        document.addEventListener('DOMContentLoaded', getResumeCounter);
-    </script>
-    <script>
-        // Initialize the SignalR Client connection builder
+        // 2. CRUCIAL STEP: Replace this with your actual public Azure Function URL!
+        const REALTIME_API_URL = 'https://YOUR-NEW-FUNCTION-APP-NAME.azurewebsites.net/api';
+
+        // Configure the streaming WebSockets pipeline client
         const connection = new signalR.HubConnectionBuilder()
-            // Change this to your new standalone Function App URL!
-            // Example: 'https://resume-realtime-api.azurewebsites.net/api'
-            .withUrl('https://YOUR-NEW-FUNCTION-APP-NAME.azurewebsites.net/api') 
+            .withUrl(REALTIME_API_URL) 
             .withAutomaticReconnect()
             .build();
 
-        // Listen for live updates coming down the stream from Azure
+        // Listen for live counts arriving from your standalone backend
         connection.on('updateActiveCount', (count) => {
-            // This updates the HTML element with the current live count
             const activeCounterElement = document.getElementById('active-count');
             if (activeCounterElement) {
                 activeCounterElement.textContent = count;
             }
         });
 
-        async function startLiveSync() {
+        // Combined orchestrator running cleanly on document load
+        async function runResumePipelines() {
+            // --- PIPELINE A: LOCAL TOTAL VIEWS COUNTER ---
             try {
-                // Establish the persistent WebSocket connection
+                const response = await fetch(ORIGINAL_COUNTER_URL);
+                if (!response.ok) throw new Error(`Status: ${response.status}`);
+                
+                const data = await response.json();
+                document.getElementById('visitor-count').textContent = data.count;
+            } catch (error) {
+                console.error("Original counter failed to load:", error);
+                document.getElementById('visitor-count').textContent = "Unavailable";
+            }
+
+            // --- PIPELINE B: EXTERNAL SIGNALR REAL-TIME TRACKER ---
+            try {
                 await connection.start();
                 console.log("Real-time pipeline active!");
-
-                // Ping the Join endpoint to let the backend know a new user arrived
-                await fetch('https://YOUR-NEW-FUNCTION-APP-NAME.azurewebsites.net/api/JoinPage', { method: 'POST' });
+                await fetch(`${REALTIME_API_URL}/JoinPage`, { method: 'POST' });
             } catch (err) {
-                console.error("SignalR tracking failed to initialize:", err);
+                console.error("SignalR engine connection failed:", err);
             }
         }
 
-        // Send a clean signal when the user closes or leaves the tab
+        // Send a beacon trigger to drop count by 1 instantly as the user closes tab
         window.addEventListener('beforeunload', () => {
-            // sendBeacon ensures the request finishes even as the tab closes
-            navigator.sendBeacon('https://YOUR-NEW-FUNCTION-APP-NAME.azurewebsites.net/api/LeavePage');
+            navigator.sendBeacon(`${REALTIME_API_URL}/LeavePage`);
         });
 
-        // Fire off everything as soon as the page is done loading
-        document.addEventListener('DOMContentLoaded', startLiveSync);
+        // Initialize execution hook
+        document.addEventListener('DOMContentLoaded', runResumePipelines);
     </script>
 </body>
 </html>
