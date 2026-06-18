@@ -413,45 +413,49 @@
 })();
 </script>
     <script>
-      document.getElementById('chaos-btn').addEventListener('click', function chaosMode() {
+   document.getElementById('chaos-btn').addEventListener('click', function chaosMode() {
     const btn = this;
     
-    // 1. Trigger screen shake safely
+    // 1. Start the shaking
     document.body.classList.add('core-detonation');
     btn.style.transform = 'scale(0.9)';
     btn.textContent = '💥 DETONATING...';
 
-    // 2. Wait 800ms for dramatic effect, then drop the layout
+    // 2. Explode the elements after 800ms
     setTimeout(() => {
         document.body.classList.remove('core-detonation');
         
-        // Grab literally everything structural inside the body that isn't the button container itself
-        const components = document.querySelectorAll('body > *:not(script):not(style)');
+        // TARGET DEEP: Grabs headings, sections, paragraphs, lists, spans, and images
+        const components = document.querySelectorAll('header, section, div, h1, h2, h3, p, li, span, img, a');
         
         components.forEach((el) => {
-            // Bypass the button's immediate wrapper parent so the button stays visible
-            if (el.contains(btn)) return;
+            // DO NOT explode the button, its parent container, or scripts
+            if (el.contains(btn) || el.id === 'chaos-btn' || el.tagName === 'SCRIPT' || el.tagName === 'STYLE') return;
 
-            // Generate wild, chaotic trajectories
-            const randomX = (Math.random() - 0.5) * window.innerWidth * 0.8; 
-            const randomY = window.innerHeight + 800; // Drops completely out of sight
-            const randomRotation = (Math.random() - 0.5) * 720; // Spins violently
+            // Generate wild explosion directions
+            const randomX = (Math.random() - 0.5) * window.innerWidth * 1.5; 
+            const randomY = window.innerHeight + 1000; // Force them deep off-screen
+            const randomRotation = (Math.random() - 0.5) * 1440; // Wild spinning
 
-            // Apply style transformations directly to guarantee execution
-            el.style.transition = 'transform 1.8s cubic-bezier(0.36, 0.07, 0.19, 0.97), opacity 1.5s ease-in';
+            // Inject styles instantly to override any existing CSS layout rules
+            el.style.position = 'relative';
+            el.style.inlineSize = 'auto';
+            el.style.display = 'inline-block'; 
+            el.style.transition = 'transform 2s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 1.5s ease-in';
             el.style.pointerEvents = 'none';
+            
+            // Execute the physical drop
             el.style.transform = `translate(${randomX}px, ${randomY}px) rotate(${randomRotation}deg)`;
             el.style.opacity = '0';
         });
 
-        // 3. Transform the button into an Infrastructure Reset switch
+        // 3. Turn the button into the recovery switch
         setTimeout(() => {
             btn.textContent = '🔄 Rebuild Infrastructure';
             btn.style.background = '#2ecc71';
             btn.style.boxShadow = '0 4px 15px rgba(46, 204, 113, 0.4)';
             btn.style.transform = 'scale(1.1)';
             
-            // Clean up the event listeners and assign the refresh logic
             btn.removeEventListener('click', chaosMode);
             btn.onclick = () => location.reload();
         }, 1000);
