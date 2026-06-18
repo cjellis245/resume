@@ -357,8 +357,8 @@
         // 1. Target your original relative route for lifetime hits
         const ORIGINAL_COUNTER_URL = '/api/GetResumeCounter';
 
-        // 2. CRUCIAL STEP: Replace this with your actual public Azure Function URL!
-        const REALTIME_API_URL = 'https://YOUR-NEW-FUNCTION-APP-NAME.azurewebsites.net/api';
+        // 2. Updated target URL for your brand new standalone live pipeline app
+        const REALTIME_API_URL = 'https://resumelive-fvffb3ckb2hubpg0.centralus-01.azurewebsites.net/api';
 
         // Configure the streaming WebSockets pipeline client
         const connection = new signalR.HubConnectionBuilder()
