@@ -125,6 +125,7 @@
             }
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
 </head>
 <body>
 
@@ -137,9 +138,18 @@
                 <span>🔗 <a href="https://www.linkedin.com/in/cjellisnz" target="_blank">linkedin.com/in/cjellisnz</a></span>
             </div>
             <div>
-                <div class="counter-container">
-                    👁️ Resume Views: <span id="visitor-count" style="font-weight: bold; color: var(--primary-color);">Loading...</span>
-                </div>
+                <div class="counters-wrapper">
+    
+    <div class="counter-container">
+        👁️ Total Views: <span id="visitor-count" style="font-weight: bold; color: #34495e;">Loading...</span>
+    </div>
+    
+    <div class="counter-container live-badge">
+        <span class="pulse-dot"></span>
+        <span>Live Viewers: <span id="active-count" style="font-weight: bold; color: #2ecc71;">0</span></span>
+    </div>
+
+</div>
             </div>
         </header>
 
@@ -329,6 +339,46 @@
         }
 
         document.addEventListener('DOMContentLoaded', getResumeCounter);
+    </script>
+    <script>
+        // Initialize the SignalR Client connection builder
+        const connection = new signalR.HubConnectionBuilder()
+            // Change this to your new standalone Function App URL!
+            // Example: 'https://resume-realtime-api.azurewebsites.net/api'
+            .withUrl('https://YOUR-NEW-FUNCTION-APP-NAME.azurewebsites.net/api') 
+            .withAutomaticReconnect()
+            .build();
+
+        // Listen for live updates coming down the stream from Azure
+        connection.on('updateActiveCount', (count) => {
+            // This updates the HTML element with the current live count
+            const activeCounterElement = document.getElementById('active-count');
+            if (activeCounterElement) {
+                activeCounterElement.textContent = count;
+            }
+        });
+
+        async function startLiveSync() {
+            try {
+                // Establish the persistent WebSocket connection
+                await connection.start();
+                console.log("Real-time pipeline active!");
+
+                // Ping the Join endpoint to let the backend know a new user arrived
+                await fetch('https://YOUR-NEW-FUNCTION-APP-NAME.azurewebsites.net/api/JoinPage', { method: 'POST' });
+            } catch (err) {
+                console.error("SignalR tracking failed to initialize:", err);
+            }
+        }
+
+        // Send a clean signal when the user closes or leaves the tab
+        window.addEventListener('beforeunload', () => {
+            // sendBeacon ensures the request finishes even as the tab closes
+            navigator.sendBeacon('https://YOUR-NEW-FUNCTION-APP-NAME.azurewebsites.net/api/LeavePage');
+        });
+
+        // Fire off everything as soon as the page is done loading
+        document.addEventListener('DOMContentLoaded', startLiveSync);
     </script>
 </body>
 </html>
