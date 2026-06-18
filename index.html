@@ -158,6 +158,32 @@
                 flex-direction: column;
             }
         }
+        /* SELF DESTRUCT - Violent screen shake for anticipation */
+@keyframes intense-shake {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    10% { transform: translate(-2px, -3px) rotate(-1deg); }
+    20% { transform: translate(-4px, 0px) rotate(2deg); }
+    30% { transform: translate(0px, 3px) rotate(0deg); }
+    40% { transform: translate(2px, -1px) rotate(1deg); }
+    50% { transform: translate(-2px, 4px) rotate(-2deg); }
+    60% { transform: translate(-4px, 2px) rotate(0deg); }
+    70% { transform: translate(3px, 2px) rotate(-1deg); }
+    80% { transform: translate(-2px, -2px) rotate(2deg); }
+    90% { transform: translate(3px, 3px) rotate(0deg); }
+    100% { transform: translate(1px, -3px) rotate(-1deg); }
+}
+
+.core-detonation {
+    animation: intense-shake 0.5s infinite;
+    overflow: hidden;
+}
+
+/* The physics fall-away */
+.shattered-piece {
+    display: inline-block; /* Allows individual translation/rotation */
+    transition: transform 1.8s cubic-bezier(0.36, 0.07, 0.19, 0.97), opacity 1.5s ease-in;
+    pointer-events: none; /* Stops users from clicking ghost elements */
+}
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
 </head>
@@ -381,5 +407,55 @@
   });
 })();
 </script>
+    <script>
+        document.getElementById('chaos-btn').addEventListener('click', function chaosMode() {
+    const btn = this;
+    
+    // 1. Trigger screen shake
+    document.body.classList.add('core-detonation');
+    btn.style.transform = 'scale(0.9)';
+    btn.textContent = '💥 DETONATING...';
+
+    // 2. Wait 800ms for dramatic effect, then drop the layout
+    setTimeout(() => {
+        document.body.classList.remove('core-detonation');
+        
+        // Target structural blocks and textual pieces
+        const components = document.querySelectorAll('header, section, .job, .education-item, h1, h2, p, li, .contact-info span');
+        
+        components.forEach((el) => {
+            // Prevent the button container itself from falling immediately
+            if (el.contains(btn) || el.id === 'chaos-btn') return;
+
+            // Generate wild, chaotic trajectories
+            const randomX = (Math.random() - 0.5) * window.innerWidth * 0.8; 
+            const randomY = window.innerHeight + 500; // Drops completely off the viewport
+            const randomRotation = (Math.random() - 0.5) * 1080; // Spins violently up to 3 times
+
+            el.classList.add('shattered-piece');
+            el.style.transform = `translate(${randomX}px, ${randomY}px) rotate(${randomRotation}deg)`;
+            el.style.opacity = '0';
+        });
+
+        // 3. Transform the button into an Infrastructure Reset switch
+        setTimeout(() => {
+            btn.textContent = '🔄 Rebuild Infrastructure';
+            btn.style.background = '#2ecc71';
+            btn.style.boxShadow = '0 4px 15px rgba(46, 204, 113, 0.4)';
+            btn.style.transform = 'scale(1.1)';
+            
+            // Clicking it again smoothly reloads the page to fix everything
+            btn.removeEventListener('click', chaosMode);
+            btn.addEventListener('click', () => location.reload());
+        }, 1000);
+
+    }, 800);
+});
+    </script>
+    <div style="text-align: center; margin-top: 40px;">
+    <button id="chaos-btn" style="background: #e74c3c; color: white; border: none; padding: 12px 28px; font-size: 1.1em; border-radius: 50px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4); transition: all 0.2s ease;">
+        ⚠️ Initiate Self-Destruct
+    </button>
+</div>
 </body>
 </html>
