@@ -1,7 +1,6 @@
 const { app } = require('@azure/functions');
 const { CosmosClient } = require('@azure/cosmos');
 
-// Pointing to your single container1
 const container = new CosmosClient(process.env.CosmosDBConnectionString)
   .database('resume').container('container1');
 
@@ -14,45 +13,44 @@ app.http('heartbeat', {
     try {
       const url = new URL(request.url);
       const sid = (url.searchParams.get('sid') || '').slice(0, 64);
+      const leave = url.searchParams.get('leave') === '1'; // Detect the exit flag
       const nowSec = Math.floor(Date.now() / 1000);
 
-      // --- 1. HANDLE LIVE VIEWER HEARTBEAT ---
       if (sid) {
-        await container.items.upsert({
-          id: sid,          // Unique ID per user tab
-          type: 'live',     // Label to keep data types distinct
-          lastSeen: nowSec,
-          ttl: WINDOW_SECONDS * 2  // Auto-deletes this row when they leave
-        });
+        if (leave) {
+          // --- INSTANT DISCONNECT ---
+          // Because your partition key is /id, passing 'sid' twice targets the exact row
+          try {
+            await container.item(sid, sid).delete();
+          } catch (err) {
+            // Ignore errors if the record was already deleted or expired
+          }
+        } else {
+          // --- NORMAL HEARTBEAT ---
+          await container.items.upsert({
+            id: sid,
+            type: 'live',
+            lastSeen: nowSec,
+            ttl: WINDOW_SECONDS * 2  // Backup safety net if beacon fails
+          });
+        }
       }
 
-      // --- 2. OPTIONAL: INCREMENT TOTAL VIEWS (If a new session) ---
-      // If your frontend script only hits this on initial load (not on the 10s loop)
+      // --- OPTIONAL: INCREMENT TOTAL VIEWS ---
       const isInitialLoad = url.searchParams.get('init') === 'true'; 
-      if (isInitialLoad) {
+      if (isInitialLoad && !leave) {
         try {
-          // Read the existing total record
           const { resource: totalDoc } = await container.item('total_analytics', 'total_analytics').read();
-          
           if (totalDoc) {
             totalDoc.count += 1;
             await container.items.upsert(totalDoc);
-          } else {
-            // First time setup if the row doesn't exist in container1 yet
-            await container.items.upsert({
-              id: 'total_analytics',
-              type: 'total',
-              count: 1
-              // CRITICAL: No TTL property here, so it never deletes itself!
-            });
           }
         } catch (dbErr) {
-          // If read fails because it doesn't exist, create it
           await container.items.upsert({ id: 'total_analytics', type: 'total', count: 1 });
         }
       }
 
-      // --- 3. QUERY CURRENT LIVE COUNT ---
+      // --- QUERY CURRENT LIVE COUNT ---
       const cutoff = nowSec - WINDOW_SECONDS;
       const { resources: liveResources } = await container.items
         .query({
@@ -61,7 +59,7 @@ app.http('heartbeat', {
         })
         .fetchAll();
 
-      // --- 4. QUERY CURRENT TOTAL COUNT ---
+      // --- QUERY CURRENT TOTAL COUNT ---
       const { resources: totalResources } = await container.items
         .query({
           query: "SELECT VALUE c.count FROM c WHERE c.id = 'total_analytics'"
