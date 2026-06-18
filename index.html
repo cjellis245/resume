@@ -429,13 +429,16 @@
     document.getElementById('chaos-btn').addEventListener('click', function chaosMode() {
     const btn = this;
     
-    // Add smooth transition properties to the button natively
+    // Smooth transition properties for the button
     btn.style.transition = 'all 1.2s cubic-bezier(0.19, 1, 0.22, 1)';
     
     // 1. Core overload sequence begins
     document.body.classList.add('core-detonation');
     btn.classList.add('btn-overload');
     btn.textContent = '💥 CRITICAL OVERLOAD...';
+
+    // Query elements once globally for this execution sequence
+    const components = document.querySelectorAll('header, section, div, h1, h2, h3, p, li, span, img, a');
 
     // 2. Explode the layout after 1 second of heavy shaking
     setTimeout(() => {
@@ -447,41 +450,76 @@
         btn.textContent = '⏳ SYSTEM CORRUPTED';
         btn.style.background = '#7f8c8d';
 
-        // Grab all targetable text and structural boxes
-        const components = document.querySelectorAll('header, section, div, h1, h2, h3, p, li, span, img, a');
-        
         components.forEach((el) => {
-            // Prevent the button, its wrapper, or configurations from flying away
             if (el.contains(btn) || el.id === 'chaos-btn' || el.tagName === 'SCRIPT' || el.tagName === 'STYLE') return;
 
-            // Wild trajectories stretching across and deep under the view window
+            // Chaotic flight metrics
             const randomX = (Math.random() - 0.5) * window.innerWidth * 1.8; 
             const randomY = window.innerHeight + 1200; 
-            const randomRotation = (Math.random() - 0.5) * 1800; // Spins up to 5 complete rotations
+            const randomRotation = (Math.random() - 0.5) * 1800;
 
-            // Prepare layout rules dynamically to break standard CSS alignment rules
+            // Prepare layout overrides
             el.style.position = 'relative';
             el.style.display = 'inline-block'; 
             
-            // SLOW DRIFT CONFIGURATION (3.5 Seconds, floaty ease-out)
+            // Cinematic drift out (3.5 seconds)
             el.style.transition = 'transform 3.5s cubic-bezier(0.1, 0.8, 0.25, 1), opacity 3s ease-in';
             el.style.pointerEvents = 'none';
             
-            // Blast them into the void
             el.style.transform = `translate(${randomX}px, ${randomY}px) rotate(${randomRotation}deg)`;
             el.style.opacity = '0';
         });
 
-        // 3. Bring the infrastructure recovery switch online right as the dust clears
+        // 3. Bring the infrastructure recovery switch online
         setTimeout(() => {
             btn.textContent = '🔄 Rebuild Infrastructure';
             btn.style.background = '#2ecc71';
             btn.style.boxShadow = '0 10px 30px rgba(46, 204, 113, 0.6)';
             
-            // Clean house on events and swap logic to a hot reload
-            btn.removeEventListener('click', chaosMode);
-            btn.onclick = () => location.reload();
-        }, 2200); // Triggers midway through the float animation for perfect timing
+            // --- TIME REVERSAL LOGIC ---
+            btn.onclick = function reverseChaos() {
+                btn.onclick = null; // Lock button inputs during reassembly
+                btn.textContent = '🛠️ REASSEMBLING...';
+                btn.style.background = '#3498db';
+                btn.style.boxShadow = '0 10px 30px rgba(52, 152, 219, 0.6)';
+
+                components.forEach((el) => {
+                    if (el.contains(btn) || el.id === 'chaos-btn' || el.tagName === 'SCRIPT' || el.tagName === 'STYLE') return;
+
+                    // Slow, smooth transition vectors for the journey back home (3 seconds)
+                    el.style.transition = 'transform 3s cubic-bezier(0.25, 1, 0.5, 1), opacity 2.5s ease-out';
+                    el.style.transform = 'translate(0px, 0px) rotate(0deg)';
+                    el.style.opacity = '1';
+                });
+
+                // Pull the button out of center grid back to original position
+                setTimeout(() => {
+                    btn.classList.remove('rebuild-center');
+                    btn.textContent = '⚠️ Initiate Self-Destruct';
+                    btn.style.background = '#e74c3c';
+                    btn.style.boxShadow = '0 4px 15px rgba(231, 76, 60, 0.4)';
+                    
+                    // 4. CLEANUP: Strip inline styles once everything lands perfectly
+                    setTimeout(() => {
+                        components.forEach((el) => {
+                            if (el.contains(btn) || el.id === 'chaos-btn' || el.tagName === 'SCRIPT' || el.tagName === 'STYLE') return;
+                            
+                            // Wiping style attributes restores the precise native layout rules (Grid/Flexbox)
+                            el.style.position = '';
+                            el.style.display = '';
+                            el.style.transition = '';
+                            el.style.pointerEvents = '';
+                            el.style.transform = '';
+                            el.style.opacity = '';
+                        });
+                        
+                        // Re-bind the initial explosion event listener so people can loop it forever
+                        btn.addEventListener('click', chaosMode);
+                    }, 1200); // Matches the remaining layout landing slide time
+
+                }, 2000); // Triggers halfway through the flight home for visual overlap
+            };
+        }, 2200);
 
     }, 1000);
 });
