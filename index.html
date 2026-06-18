@@ -158,7 +158,7 @@
                 flex-direction: column;
             }
         }
-        /* SELF DESTRUCT - Violent screen shake for anticipation */
+       /* Violent screen shake for anticipation */
 @keyframes intense-shake {
     0% { transform: translate(1px, 1px) rotate(0deg); }
     10% { transform: translate(-2px, -3px) rotate(-1deg); }
@@ -178,14 +178,27 @@
     overflow: hidden;
 }
 
-/* The physics fall-away */
-.shattered-piece {
-    display: inline-block; /* Allows individual translation/rotation */
-    transition: transform 1.8s cubic-bezier(0.36, 0.07, 0.19, 0.97), opacity 1.5s ease-in;
-    pointer-events: none; /* Stops users from clicking ghost elements */
+/* Pulsing energy glow for the button during detonation */
+@keyframes button-overload {
+    0% { box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4); transform: scale(1); }
+    100% { box-shadow: 0 0 35px #e74c3c, 0 0 60px rgba(231, 76, 60, 0.6); transform: scale(1.1); }
+}
+
+.btn-overload {
+    animation: button-overload 0.2s infinite alternate !important;
+    background-color: #ff331f !important;
+}
+
+/* Smoothly glides the button to the exact center of the screen */
+.rebuild-center {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) scale(1.3) !important;
+    z-index: 99999 !important;
+    margin: 0 !important;
 }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
 </head>
 <body>
 
@@ -413,54 +426,64 @@
 })();
 </script>
     <script>
-   document.getElementById('chaos-btn').addEventListener('click', function chaosMode() {
+    document.getElementById('chaos-btn').addEventListener('click', function chaosMode() {
     const btn = this;
     
-    // 1. Start the shaking
+    // Add smooth transition properties to the button natively
+    btn.style.transition = 'all 1.2s cubic-bezier(0.19, 1, 0.22, 1)';
+    
+    // 1. Core overload sequence begins
     document.body.classList.add('core-detonation');
-    btn.style.transform = 'scale(0.9)';
-    btn.textContent = '💥 DETONATING...';
+    btn.classList.add('btn-overload');
+    btn.textContent = '💥 CRITICAL OVERLOAD...';
 
-    // 2. Explode the elements after 800ms
+    // 2. Explode the layout after 1 second of heavy shaking
     setTimeout(() => {
         document.body.classList.remove('core-detonation');
+        btn.classList.remove('btn-overload');
         
-        // TARGET DEEP: Grabs headings, sections, paragraphs, lists, spans, and images
+        // Glide the button seamlessly to the center of the viewport
+        btn.classList.add('rebuild-center');
+        btn.textContent = '⏳ SYSTEM CORRUPTED';
+        btn.style.background = '#7f8c8d';
+
+        // Grab all targetable text and structural boxes
         const components = document.querySelectorAll('header, section, div, h1, h2, h3, p, li, span, img, a');
         
         components.forEach((el) => {
-            // DO NOT explode the button, its parent container, or scripts
+            // Prevent the button, its wrapper, or configurations from flying away
             if (el.contains(btn) || el.id === 'chaos-btn' || el.tagName === 'SCRIPT' || el.tagName === 'STYLE') return;
 
-            // Generate wild explosion directions
-            const randomX = (Math.random() - 0.5) * window.innerWidth * 1.5; 
-            const randomY = window.innerHeight + 1000; // Force them deep off-screen
-            const randomRotation = (Math.random() - 0.5) * 1440; // Wild spinning
+            // Wild trajectories stretching across and deep under the view window
+            const randomX = (Math.random() - 0.5) * window.innerWidth * 1.8; 
+            const randomY = window.innerHeight + 1200; 
+            const randomRotation = (Math.random() - 0.5) * 1800; // Spins up to 5 complete rotations
 
-            // Inject styles instantly to override any existing CSS layout rules
+            // Prepare layout rules dynamically to break standard CSS alignment rules
             el.style.position = 'relative';
-            el.style.inlineSize = 'auto';
             el.style.display = 'inline-block'; 
-            el.style.transition = 'transform 2s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 1.5s ease-in';
+            
+            // SLOW DRIFT CONFIGURATION (3.5 Seconds, floaty ease-out)
+            el.style.transition = 'transform 3.5s cubic-bezier(0.1, 0.8, 0.25, 1), opacity 3s ease-in';
             el.style.pointerEvents = 'none';
             
-            // Execute the physical drop
+            // Blast them into the void
             el.style.transform = `translate(${randomX}px, ${randomY}px) rotate(${randomRotation}deg)`;
             el.style.opacity = '0';
         });
 
-        // 3. Turn the button into the recovery switch
+        // 3. Bring the infrastructure recovery switch online right as the dust clears
         setTimeout(() => {
             btn.textContent = '🔄 Rebuild Infrastructure';
             btn.style.background = '#2ecc71';
-            btn.style.boxShadow = '0 4px 15px rgba(46, 204, 113, 0.4)';
-            btn.style.transform = 'scale(1.1)';
+            btn.style.boxShadow = '0 10px 30px rgba(46, 204, 113, 0.6)';
             
+            // Clean house on events and swap logic to a hot reload
             btn.removeEventListener('click', chaosMode);
             btn.onclick = () => location.reload();
-        }, 1000);
+        }, 2200); // Triggers midway through the float animation for perfect timing
 
-    }, 800);
+    }, 1000);
 });
     </script>
     
