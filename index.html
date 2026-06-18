@@ -158,7 +158,7 @@
                 flex-direction: column;
             }
         }
-       /* Violent screen shake for anticipation */
+      /* Violent screen shake for anticipation */
 @keyframes intense-shake {
     0% { transform: translate(1px, 1px) rotate(0deg); }
     10% { transform: translate(-2px, -3px) rotate(-1deg); }
@@ -175,7 +175,14 @@
 
 .core-detonation {
     animation: intense-shake 0.5s infinite;
-    overflow: hidden;
+}
+
+/* CRITICAL FOR MOBILE: Prevents browser from zooming out or scrolling when items fly away */
+.viewport-lock {
+    overflow: hidden !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    position: relative !important;
 }
 
 /* Pulsing energy glow for the button during detonation */
@@ -189,13 +196,13 @@
     background-color: #ff331f !important;
 }
 
-/* Smoothly glides the button to the exact center of the screen */
+/* Glides button perfectly to the absolute viewport center on both desktop & mobile */
 .rebuild-center {
     position: fixed !important;
     top: 50% !important;
     left: 50% !important;
-    transform: translate(-50%, -50%) scale(1.3) !important;
-    z-index: 99999 !important;
+    transform: translate(-50%, -50%) scale(1.2) !important;
+    z-index: 999999 !important;
     margin: 0 !important;
 }
     </style>
@@ -426,103 +433,111 @@
 })();
 </script>
     <script>
-    document.getElementById('chaos-btn').addEventListener('click', function chaosMode() {
-    const btn = this;
-    
-    // Smooth transition properties for the button
-    btn.style.transition = 'all 1.2s cubic-bezier(0.19, 1, 0.22, 1)';
-    
-    // 1. Core overload sequence begins
-    document.body.classList.add('core-detonation');
-    btn.classList.add('btn-overload');
-    btn.textContent = '💥 CRITICAL OVERLOAD...';
+(function() {
+    const btn = document.getElementById('chaos-btn');
+    if (!btn) return;
 
-    // Query elements once globally for this execution sequence
-    const components = document.querySelectorAll('header, section, div, h1, h2, h3, p, li, span, img, a');
+    // Target ONLY top-level direct content blocks to avoid nested element collision glitching
+    const targets = document.querySelectorAll('body > *:not(script):not(style), header, section, main > section');
 
-    // 2. Explode the layout after 1 second of heavy shaking
-    setTimeout(() => {
-        document.body.classList.remove('core-detonation');
-        btn.classList.remove('btn-overload');
+    function executeExplosion() {
+        // 1. Lock viewports to kill mobile zooming bugs instantly
+        document.body.classList.add('core-detonation');
+        document.documentElement.classList.add('viewport-lock');
+        document.body.classList.add('viewport-lock');
         
-        // Glide the button seamlessly to the center of the viewport
-        btn.classList.add('rebuild-center');
-        btn.textContent = '⏳ SYSTEM CORRUPTED';
-        btn.style.background = '#7f8c8d';
+        btn.classList.add('btn-overload');
+        btn.textContent = '💥 CRITICAL OVERLOAD...';
+        btn.style.transition = 'all 1.2s cubic-bezier(0.19, 1, 0.22, 1)';
 
-        components.forEach((el) => {
-            if (el.contains(btn) || el.id === 'chaos-btn' || el.tagName === 'SCRIPT' || el.tagName === 'STYLE') return;
-
-            // Chaotic flight metrics
-            const randomX = (Math.random() - 0.5) * window.innerWidth * 1.8; 
-            const randomY = window.innerHeight + 1200; 
-            const randomRotation = (Math.random() - 0.5) * 1800;
-
-            // Prepare layout overrides
-            el.style.position = 'relative';
-            el.style.display = 'inline-block'; 
+        setTimeout(() => {
+            document.body.classList.remove('core-detonation');
+            btn.classList.remove('btn-overload');
             
-            // Cinematic drift out (3.5 seconds)
-            el.style.transition = 'transform 3.5s cubic-bezier(0.1, 0.8, 0.25, 1), opacity 3s ease-in';
-            el.style.pointerEvents = 'none';
-            
-            el.style.transform = `translate(${randomX}px, ${randomY}px) rotate(${randomRotation}deg)`;
-            el.style.opacity = '0';
+            // Send button to absolute screen center
+            btn.classList.add('rebuild-center');
+            btn.textContent = '⏳ SYSTEM CORRUPTED';
+            btn.style.background = '#7f8c8d';
+
+            targets.forEach((el) => {
+                // Do not fly away the button or the wrapper element holding it
+                if (el.contains(btn) || el.id === 'chaos-btn') return;
+
+                const randomX = (Math.random() - 0.5) * window.innerWidth * 1.5; 
+                const randomY = window.innerHeight + 1000; 
+                const randomRotation = (Math.random() - 0.5) * 1440;
+
+                // Configure smooth slow outward drift (3.5 seconds)
+                el.style.position = 'relative';
+                el.style.zIndex = '1';
+                el.style.transition = 'transform 3.5s cubic-bezier(0.1, 0.8, 0.25, 1), opacity 3s ease-in';
+                el.style.pointerEvents = 'none';
+                
+                el.style.transform = `translate(${randomX}px, ${randomY}px) rotate(${randomRotation}deg)`;
+                el.style.opacity = '0';
+            });
+
+            // Bring Rebuild options online safely after dust settles
+            setTimeout(() => {
+                btn.textContent = '🔄 Rebuild Infrastructure';
+                btn.style.background = '#2ecc71';
+                btn.style.boxShadow = '0 10px 30px rgba(46, 204, 113, 0.6)';
+                
+                // Swap event listener cleanly to Rewind state
+                btn.onclick = executeRewind;
+            }, 2500);
+
+        }, 1000);
+    }
+
+    function executeRewind() {
+        btn.onclick = null; // Lock button instantly to prevent multi-click spam glitches
+        btn.textContent = '🛠️ REASSEMBLING...';
+        btn.style.background = '#3498db';
+        btn.style.boxShadow = '0 10px 30px rgba(52, 152, 219, 0.6)';
+
+        targets.forEach((el) => {
+            if (el.contains(btn) || el.id === 'chaos-btn') return;
+
+            // Direct reverse trajectory configuration (Slow 3.5 seconds backward slide)
+            el.style.transition = 'transform 3.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 3s ease-out';
+            el.style.transform = 'translate(0px, 0px) rotate(0deg)';
+            el.style.opacity = '1';
         });
 
-        // 3. Bring the infrastructure recovery switch online
+        // Pull the button backwards out of central grid alignment seamlessly
         setTimeout(() => {
-            btn.textContent = '🔄 Rebuild Infrastructure';
-            btn.style.background = '#2ecc71';
-            btn.style.boxShadow = '0 10px 30px rgba(46, 204, 113, 0.6)';
+            btn.classList.remove('rebuild-center');
+            btn.textContent = '⚠️ Initiate Self-Destruct';
+            btn.style.background = '#e74c3c';
+            btn.style.boxShadow = '0 4px 15px rgba(231, 76, 60, 0.4)';
             
-            // --- TIME REVERSAL LOGIC ---
-            btn.onclick = function reverseChaos() {
-                btn.onclick = null; // Lock button inputs during reassembly
-                btn.textContent = '🛠️ REASSEMBLING...';
-                btn.style.background = '#3498db';
-                btn.style.boxShadow = '0 10px 30px rgba(52, 152, 219, 0.6)';
-
-                components.forEach((el) => {
-                    if (el.contains(btn) || el.id === 'chaos-btn' || el.tagName === 'SCRIPT' || el.tagName === 'STYLE') return;
-
-                    // Slow, smooth transition vectors for the journey back home (3 seconds)
-                    el.style.transition = 'transform 3s cubic-bezier(0.25, 1, 0.5, 1), opacity 2.5s ease-out';
-                    el.style.transform = 'translate(0px, 0px) rotate(0deg)';
-                    el.style.opacity = '1';
+            // Clean house completely on inline styles to restore natural CSS Grid/Flexbox stability
+            setTimeout(() => {
+                targets.forEach((el) => {
+                    if (el.contains(btn) || el.id === 'chaos-btn') return;
+                    el.style.position = '';
+                    el.style.zIndex = '';
+                    el.style.transition = '';
+                    el.style.pointerEvents = '';
+                    el.style.transform = '';
+                    el.style.opacity = '';
                 });
 
-                // Pull the button out of center grid back to original position
-                setTimeout(() => {
-                    btn.classList.remove('rebuild-center');
-                    btn.textContent = '⚠️ Initiate Self-Destruct';
-                    btn.style.background = '#e74c3c';
-                    btn.style.boxShadow = '0 4px 15px rgba(231, 76, 60, 0.4)';
-                    
-                    // 4. CLEANUP: Strip inline styles once everything lands perfectly
-                    setTimeout(() => {
-                        components.forEach((el) => {
-                            if (el.contains(btn) || el.id === 'chaos-btn' || el.tagName === 'SCRIPT' || el.tagName === 'STYLE') return;
-                            
-                            // Wiping style attributes restores the precise native layout rules (Grid/Flexbox)
-                            el.style.position = '';
-                            el.style.display = '';
-                            el.style.transition = '';
-                            el.style.pointerEvents = '';
-                            el.style.transform = '';
-                            el.style.opacity = '';
-                        });
-                        
-                        // Re-bind the initial explosion event listener so people can loop it forever
-                        btn.addEventListener('click', chaosMode);
-                    }, 1200); // Matches the remaining layout landing slide time
+                // Unlock viewports completely so user can browse naturally again
+                document.documentElement.classList.remove('viewport-lock');
+                document.body.classList.remove('viewport-lock');
 
-                }, 2000); // Triggers halfway through the flight home for visual overlap
-            };
-        }, 2200);
+                // Return button loop back to initial explosion hook cleanly
+                btn.onclick = executeExplosion;
+            }, 1200); // Wait for the final visual layout settle to drop inline modifications
 
-    }, 1000);
-});
+        }, 2500); // Let elements start tracking backwards for 2.5 seconds before button slides home
+    }
+
+    // Initial assignment
+    btn.onclick = executeExplosion;
+})();
     </script>
     
 </body>
