@@ -377,6 +377,11 @@
             <h2>Referees</h2>
             <p>Available on request</p>
         </section>
+        <div style="text-align: center; margin-top: 40px;">
+    <button id="chaos-btn" style="background: #e74c3c; color: white; border: none; padding: 12px 28px; font-size: 1.1em; border-radius: 50px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4); transition: all 0.2s ease;">
+        ⚠️ Initiate Self-Destruct
+    </button>
+</div>
     </div>
 
  <script>
@@ -408,10 +413,10 @@
 })();
 </script>
     <script>
-        document.getElementById('chaos-btn').addEventListener('click', function chaosMode() {
+      document.getElementById('chaos-btn').addEventListener('click', function chaosMode() {
     const btn = this;
     
-    // 1. Trigger screen shake
+    // 1. Trigger screen shake safely
     document.body.classList.add('core-detonation');
     btn.style.transform = 'scale(0.9)';
     btn.textContent = '💥 DETONATING...';
@@ -420,19 +425,21 @@
     setTimeout(() => {
         document.body.classList.remove('core-detonation');
         
-        // Target structural blocks and textual pieces
-        const components = document.querySelectorAll('header, section, .job, .education-item, h1, h2, p, li, .contact-info span');
+        // Grab literally everything structural inside the body that isn't the button container itself
+        const components = document.querySelectorAll('body > *:not(script):not(style)');
         
         components.forEach((el) => {
-            // Prevent the button container itself from falling immediately
-            if (el.contains(btn) || el.id === 'chaos-btn') return;
+            // Bypass the button's immediate wrapper parent so the button stays visible
+            if (el.contains(btn)) return;
 
             // Generate wild, chaotic trajectories
             const randomX = (Math.random() - 0.5) * window.innerWidth * 0.8; 
-            const randomY = window.innerHeight + 500; // Drops completely off the viewport
-            const randomRotation = (Math.random() - 0.5) * 1080; // Spins violently up to 3 times
+            const randomY = window.innerHeight + 800; // Drops completely out of sight
+            const randomRotation = (Math.random() - 0.5) * 720; // Spins violently
 
-            el.classList.add('shattered-piece');
+            // Apply style transformations directly to guarantee execution
+            el.style.transition = 'transform 1.8s cubic-bezier(0.36, 0.07, 0.19, 0.97), opacity 1.5s ease-in';
+            el.style.pointerEvents = 'none';
             el.style.transform = `translate(${randomX}px, ${randomY}px) rotate(${randomRotation}deg)`;
             el.style.opacity = '0';
         });
@@ -444,18 +451,14 @@
             btn.style.boxShadow = '0 4px 15px rgba(46, 204, 113, 0.4)';
             btn.style.transform = 'scale(1.1)';
             
-            // Clicking it again smoothly reloads the page to fix everything
+            // Clean up the event listeners and assign the refresh logic
             btn.removeEventListener('click', chaosMode);
-            btn.addEventListener('click', () => location.reload());
+            btn.onclick = () => location.reload();
         }, 1000);
 
     }, 800);
 });
     </script>
-    <div style="text-align: center; margin-top: 40px;">
-    <button id="chaos-btn" style="background: #e74c3c; color: white; border: none; padding: 12px 28px; font-size: 1.1em; border-radius: 50px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4); transition: all 0.2s ease;">
-        ⚠️ Initiate Self-Destruct
-    </button>
-</div>
+    
 </body>
 </html>
