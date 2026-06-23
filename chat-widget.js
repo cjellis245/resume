@@ -36,7 +36,7 @@
     panel.classList.toggle('open');
     if (panel.classList.contains('open')) {
       input.focus();
-      if (!log.children.length) addMsg('bot', "Hi! Ask me anything about Cameron's experience. Try \"What Azure work has he done?\"");
+      if (!log.children.length) addMsg('bot', "Hi! Ask me anything about Christian's experience. Try \"What Azure work has he done?\"");
     }
   });
   panel.querySelector('#cj-chat-close').addEventListener('click', () => panel.classList.remove('open'));
