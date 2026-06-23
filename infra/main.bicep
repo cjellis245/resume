@@ -1,7 +1,7 @@
 param appName string = 'ResumeWEB'
 param location string = 'centralus' // Matches your existing Static Web App location
 
-// 1. Provisions your Static Web App on the Free Tier (No Managed Identity allowed on Free)
+// 1. Provisions your Static Web App on the Free Tier
 resource staticWebApp 'Microsoft.Web/staticSites@2023-01-01' = {
   name: appName
   location: location
@@ -12,7 +12,7 @@ resource staticWebApp 'Microsoft.Web/staticSites@2023-01-01' = {
   properties: {}
 }
 
-// 2. Provisions your Azure OpenAI Service (Moved to Sweden Central for open developer quota)
+// 2. Provisions your Azure OpenAI Service (In Sweden Central for open developer quota)
 resource openAiAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
   name: 'cjellis-resume-openai'
   location: 'swedencentral' 
@@ -21,7 +21,7 @@ resource openAiAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
   properties: { publicNetworkAccess: 'enabled' }
 }
 
-// 3. Deploys the gpt-4.1-mini model (Capacity dropped to 1 to clear regional limits)
+// 3. Deploys the gpt-4.1-mini model
 resource aiModel 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = {
   parent: openAiAccount
   name: 'resume-chat-model'
@@ -35,20 +35,12 @@ resource aiModel 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' =
   sku: { name: 'GlobalStandard', capacity: 1 }
 }
 
-// 4. Provisions your Vector Search Database
-resource searchService 'Microsoft.Search/searchServices@2023-11-01' = {
+// 4. References your EXISTING Search Database (Bypasses creation blocks entirely)
+resource searchService 'Microsoft.Search/searchServices@2023-11-01' existing = {
   name: 'cjellis-resume-search'
-  location: 'eastus'
-  sku: { name: 'free' } // 100% Lifetime Free Tier
-  properties: {
-    replicaCount: 1
-    partitionCount: 1
-    publicNetworkAccess: 'enabled'
-  }
 }
 
-// 5. Configures environment variables straight inside your existing ResumeWEB app automatically
-// We securely pull the deployment keys directly to authenticate without needing a SWA Identity card.
+// 5. Configures environment variables straight inside your Static Web App automatically
 resource swaConfig 'Microsoft.Web/staticSites/config@2023-01-01' = {
   parent: staticWebApp
   name: 'appsettings'
