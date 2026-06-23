@@ -32,7 +32,7 @@ resource aiModel 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' =
     model: {
       format: 'OpenAI'
       name: 'gpt-4o-mini'
-      version: '2024-07-18'
+      version: '2024-10-01'
     }
   }
   sku: { name: 'Standard', capacity: 10 }
