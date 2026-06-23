@@ -31,11 +31,11 @@ resource aiModel 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' =
   properties: {
     model: {
       format: 'OpenAI'
-      name: 'gpt-4o-mini'
-      version: '2024-10-01'
+      name: 'gpt-5.4-mini'
+      version: '2026-03-17'
     }
   }
-  sku: { name: 'Standard', capacity: 10 }
+  sku: { name: 'GlobalStandard', capacity: 10 }
 }
 
 // 4. Provisions your Vector Search Database
