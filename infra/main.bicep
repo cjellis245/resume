@@ -12,9 +12,9 @@ resource staticWebApp 'Microsoft.Web/staticSites@2023-01-01' = {
   properties: {}
 }
 
-// 2. Provisions your Azure OpenAI Service (Given a fresh name to bypass the Azure lock)
+// 2. Provisions your Azure OpenAI Service
 resource openAiAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
-  name: 'cjellis-res-openai' // 👈 Changed name to break the provisioning freeze
+  name: 'cjellis-res-openai' 
   location: 'swedencentral' 
   kind: 'OpenAI'
   sku: { name: 'S0' }
@@ -33,23 +33,4 @@ resource aiModel 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' =
     }
   }
   sku: { name: 'GlobalStandard', capacity: 1 }
-}
-
-// 4. References your EXISTING Search Database 
-resource searchService 'Microsoft.Search/searchServices@2023-11-01' existing = {
-  name: 'cjellis-resume-search'
-}
-
-// 5. Configures environment variables straight inside your Static Web App automatically
-resource swaConfig 'Microsoft.Web/staticSites/config@2023-01-01' = {
-  parent: staticWebApp
-  name: 'appsettings'
-  properties: {
-    OPENAI_ENDPOINT: openAiAccount.properties.endpoint
-    OPENAI_CHAT_DEPLOYMENT: 'resume-chat-model'
-    OPENAI_API_KEY: openAiAccount.listKeys().key1
-    SEARCH_ENDPOINT: 'https://${searchService.name}.search.windows.net'
-    SEARCH_INDEX: 'resume'
-    SEARCH_API_KEY: searchService.listKeys().primaryKey
-  }
 }
