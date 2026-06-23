@@ -12,9 +12,9 @@ resource staticWebApp 'Microsoft.Web/staticSites@2023-01-01' = {
   properties: {}
 }
 
-// 2. Provisions your Azure OpenAI Service (In Sweden Central for open developer quota)
+// 2. Provisions your Azure OpenAI Service (Given a fresh name to bypass the Azure lock)
 resource openAiAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
-  name: 'cjellis-resume-openai'
+  name: 'cjellis-res-openai' // 👈 Changed name to break the provisioning freeze
   location: 'swedencentral' 
   kind: 'OpenAI'
   sku: { name: 'S0' }
@@ -35,7 +35,7 @@ resource aiModel 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' =
   sku: { name: 'GlobalStandard', capacity: 1 }
 }
 
-// 4. References your EXISTING Search Database (Bypasses creation blocks entirely)
+// 4. References your EXISTING Search Database 
 resource searchService 'Microsoft.Search/searchServices@2023-11-01' existing = {
   name: 'cjellis-resume-search'
 }
