@@ -31,8 +31,8 @@ resource aiModel 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' =
   properties: {
     model: {
       format: 'OpenAI'
-      name: 'gpt-5.4-mini'
-      version: '2026-03-17'
+      name: 'gpt-4.1-mini'
+      version: '2025-04-14'
     }
   }
   sku: { name: 'GlobalStandard', capacity: 10 }
