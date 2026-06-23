@@ -2,9 +2,17 @@
   "name": "resume-api",
   "version": "1.0.0",
   "main": "src/functions/*.js",
+  "scripts": {
+    "start": "func start"
+  },
   "dependencies": {
     "@azure/cosmos": "^4.2.0",
-    "@azure/functions": "^4.6.0"
+    "@azure/functions": "^4.5.0",
+    "@azure/identity": "^4.5.0",
+    "@azure/keyvault-secrets": "^4.9.0",
+    "@azure/search-documents": "^12.1.0",
+    "@azure/monitor-query": "^1.3.0",
+    "openai": "^4.73.0"
   },
-  "engines": { "node": ">=20.0.0" }
+"engines": { "node": ">=20.0.0" }
 }
