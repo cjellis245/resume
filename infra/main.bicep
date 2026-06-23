@@ -1,7 +1,7 @@
-param appName string = 'cjellis-resume'
-param location string = 'eastus2' // Optimized for Free Tier feature availability
+param appName string = 'ResumeWEB'
+param location string = 'centralus' // Matches your existing Static Web App location
 
-// 1. The Azure Static Web App Ecosystem
+// 1. References your existing Static Web App and ensures Managed Identity card is active
 resource staticWebApp 'Microsoft.Web/staticSites@2023-01-01' = {
   name: appName
   location: location
@@ -10,21 +10,21 @@ resource staticWebApp 'Microsoft.Web/staticSites@2023-01-01' = {
     tier: 'Free'
   }
   identity: {
-    type: 'SystemAssigned' // Generates the passwordless cloud identity card
+    type: 'SystemAssigned' 
   }
   properties: {}
 }
 
-// 2. Azure OpenAI Account
+// 2. Provisions your Azure OpenAI Service
 resource openAiAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
-  name: '${appName}-openai'
-  location: 'eastus' // Best region for model capacity availability
+  name: 'cjellis-resume-openai'
+  location: 'eastus' // Region with optimal availability for gpt-4o-mini instances
   kind: 'OpenAI'
   sku: { name: 'S0' }
   properties: { publicNetworkAccess: 'Enabled' }
 }
 
-// 3. The gpt-4o-mini Deployment Instance
+// 3. Deploys the fast, cheap gpt-4o-mini brain
 resource aiModel 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = {
   parent: openAiAccount
   name: 'resume-chat-model'
@@ -38,11 +38,11 @@ resource aiModel 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' =
   sku: { name: 'Standard', capacity: 10 }
 }
 
-// 4. Azure AI Search (Our Vector Database Container)
+// 4. Provisions your Vector Search Database
 resource searchService 'Microsoft.Search/searchServices@2023-11-01' = {
-  name: '${appName}-search'
+  name: 'cjellis-resume-search'
   location: 'eastus'
-  sku: { name: 'free' } // 100% Free Lifetime Tier
+  sku: { name: 'free' } // 100% Lifetime Free Tier
   properties: {
     replicaCount: 1
     partitionCount: 1
@@ -50,7 +50,7 @@ resource searchService 'Microsoft.Search/searchServices@2023-11-01' = {
   }
 }
 
-// 5. Assign Permissions: Grant SWA backend access to read OpenAI
+// 5. Connects permissions: Grants ResumeWEB secure clearance to access OpenAI
 resource openAiRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(staticWebApp.id, 'openai-access')
   scope: openAiAccount
@@ -61,7 +61,7 @@ resource openAiRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   }
 }
 
-// 6. Assign Permissions: Grant SWA backend access to read Search Index
+// 6. Connects permissions: Grants ResumeWEB secure clearance to read your Search Index
 resource searchRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(staticWebApp.id, 'search-access')
   scope: searchService
@@ -72,7 +72,7 @@ resource searchRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   }
 }
 
-// 7. Push Environment Configurations straight into SWA App Settings
+// 7. Configures environment variables straight inside your existing ResumeWEB app automatically
 resource swaConfig 'Microsoft.Web/staticSites/config@2023-01-01' = {
   parent: staticWebApp
   name: 'appsettings'
