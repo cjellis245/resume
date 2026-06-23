@@ -2,7 +2,7 @@
 // Floating "Ask my Resume" chat. Streams SSE from /api/chat.
 
 (function () {
-  const API = '/api/src/functions/chat.js'; // SWA proxies /api/* to your Function App
+  const API = '/api/chat; // SWA proxies /api/* to your Function App
 
   const fab = document.createElement('button');
   fab.id = 'cj-chat-fab';
