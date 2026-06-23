@@ -1,7 +1,7 @@
 param appName string = 'ResumeWEB'
 param location string = 'centralus' // Matches your existing Static Web App location
 
-// 1. References your existing Static Web App and ensures Managed Identity card is active
+// 1. Provisions your Static Web App on the Free Tier (No Managed Identity allowed on Free)
 resource staticWebApp 'Microsoft.Web/staticSites@2023-01-01' = {
   name: appName
   location: location
@@ -9,22 +9,19 @@ resource staticWebApp 'Microsoft.Web/staticSites@2023-01-01' = {
     name: 'Free'
     tier: 'Free'
   }
- // identity: {
-//    type: 'SystemAssigned' 
-//  }
   properties: {}
 }
 
-// 2. Provisions your Azure OpenAI Service
+// 2. Provisions your Azure OpenAI Service (Moved to Sweden Central for open developer quota)
 resource openAiAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
   name: 'cjellis-resume-openai'
-  location: 'eastus' // Region with optimal availability for gpt-4o-mini instances
+  location: 'swedencentral' 
   kind: 'OpenAI'
   sku: { name: 'S0' }
   properties: { publicNetworkAccess: 'enabled' }
 }
 
-// 3. Deploys the fast, cheap gpt-4o-mini brain
+// 3. Deploys the gpt-4.1-mini model (Capacity dropped to 1 to clear regional limits)
 resource aiModel 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = {
   parent: openAiAccount
   name: 'resume-chat-model'
@@ -35,7 +32,7 @@ resource aiModel 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' =
       version: '2025-04-14'
     }
   }
-  sku: { name: 'GlobalStandard', capacity: 10 }
+  sku: { name: 'GlobalStandard', capacity: 1 }
 }
 
 // 4. Provisions your Vector Search Database
@@ -50,36 +47,17 @@ resource searchService 'Microsoft.Search/searchServices@2023-11-01' = {
   }
 }
 
-// 5. Connects permissions: Grants ResumeWEB secure clearance to access OpenAI
-resource openAiRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(staticWebApp.id, 'openai-access')
-  scope: openAiAccount
-  properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '5e0c59e6-11eb-4bbd-851d-7d4b149cdd15') // Cognitive Services OpenAI User
-    principalId: staticWebApp.identity.principalId
-    principalType: 'ServicePrincipal'
-  }
-}
-
-// 6. Connects permissions: Grants ResumeWEB secure clearance to read your Search Index
-resource searchRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(staticWebApp.id, 'search-access')
-  scope: searchService
-  properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '1407120e-8ad2-4313-a028-12c843c144c3') // Search Index Data Reader
-    principalId: staticWebApp.identity.principalId
-    principalType: 'ServicePrincipal'
-  }
-}
-
-// 7. Configures environment variables straight inside your existing ResumeWEB app automatically
+// 5. Configures environment variables straight inside your existing ResumeWEB app automatically
+// We securely pull the deployment keys directly to authenticate without needing a SWA Identity card.
 resource swaConfig 'Microsoft.Web/staticSites/config@2023-01-01' = {
   parent: staticWebApp
   name: 'appsettings'
   properties: {
     OPENAI_ENDPOINT: openAiAccount.properties.endpoint
     OPENAI_CHAT_DEPLOYMENT: 'resume-chat-model'
+    OPENAI_API_KEY: openAiAccount.listKeys().key1
     SEARCH_ENDPOINT: 'https://${searchService.name}.search.windows.net'
     SEARCH_INDEX: 'resume'
+    SEARCH_API_KEY: searchService.listKeys().primaryKey
   }
 }
