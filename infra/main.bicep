@@ -9,9 +9,9 @@ resource staticWebApp 'Microsoft.Web/staticSites@2023-01-01' = {
     name: 'Free'
     tier: 'Free'
   }
-  identity: {
-    type: 'SystemAssigned' 
-  }
+ // identity: {
+//    type: 'SystemAssigned' 
+//  }
   properties: {}
 }
 
@@ -21,7 +21,7 @@ resource openAiAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
   location: 'eastus' // Region with optimal availability for gpt-4o-mini instances
   kind: 'OpenAI'
   sku: { name: 'S0' }
-  properties: { publicNetworkAccess: 'Enabled' }
+  properties: { publicNetworkAccess: 'enabled' }
 }
 
 // 3. Deploys the fast, cheap gpt-4o-mini brain
@@ -46,7 +46,7 @@ resource searchService 'Microsoft.Search/searchServices@2023-11-01' = {
   properties: {
     replicaCount: 1
     partitionCount: 1
-    publicNetworkAccess: 'Enabled'
+    publicNetworkAccess: 'enabled'
   }
 }
 
