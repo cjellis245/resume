@@ -1,6 +1,7 @@
 // Public stats dashboard. Fetches /api/stats every 60s and renders.
 (async function () {
   const $ = (id) => document.getElementById(id);
+
   async function load() {
     let data;
     try {
@@ -12,17 +13,52 @@
       console.error('stats fetch failed', e);
       return;
     }
-    $('total').textContent = (data.total || 0).toLocaleString();
-    // Tables
+
+    // 1. Existing baseline stats
+    $('total').textContent = (data.totalPageViews || 0).toLocaleString();
+
+    // 2. NEW: Render Code Health & Performance Metrics
+    if ($('errors')) $('errors').textContent = data.jsErrors || 0;
+    if ($('speed')) $('speed').textContent = (data.avgLoadSpeed ? data.avgLoadSpeed.toFixed(2) : '0') + 's';
+    if ($('apdex')) {
+      const score = data.apdexScore || 0;
+      let label = score < 0.85 ? 'Fair' : (score < 0.94 ? 'Good' : 'Excellent');
+      $('apdex').textContent = `${score.toFixed(2)} (${label})`;
+    }
+
+    // 3. NEW: Browser Environment Bars
+    const barContainer = $('browser-bars');
+    if (barContainer && data.browsers) {
+      const maxCount = Math.max(...data.browsers.map(b => b.count), 1);
+      barContainer.innerHTML = data.browsers.map(b => `
+        <div class="bar-container">
+            <div class="bar-label"><span>${b.browser}</span><span style="color: #8b949e;">${b.count} hits</span></div>
+            <div class="bar-track"><div class="bar-fill" style="width: ${(b.count / maxCount) * 100}%"></div></div>
+        </div>`).join('');
+    }
+
+    // 4. NEW: Futuristic Terminal Ticker
+    const ticker = $('ticker');
+    if (ticker && data.timeline) {
+      ticker.innerHTML = data.timeline.map(event => {
+        const time = new Date(event.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const styledText = event.logText.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        return `<div class="terminal-line"><span class="terminal-time">[${time}]</span><span class="terminal-text">${styledText}</span></div>`;
+      }).join('');
+    }
+
+    // 5. Tables
     const fillTable = (id, rows, keyCol, label) => {
       const t = $(id);
+      if(!t) return;
       t.innerHTML = rows.length
         ? rows.map(r => `<tr><td>${escapeHtml(r[keyCol] || '(direct)')}</td><td class="num">${r.n}</td></tr>`).join('')
         : `<tr><td colspan="2" style="color:#6e7681">No ${label} yet</td></tr>`;
     };
     fillTable('pages', data.topPages || [], 'url', 'pages');
     fillTable('refs',  data.topReferrers || [], 'ref', 'referrers');
-    // Hourly trend (Chart.js)
+
+    // 6. Hourly trend (Chart.js)
     if (window.Chart && data.hourly) {
       const ctx = $('spark').getContext('2d');
       if (window._chart) window._chart.destroy();
@@ -37,32 +73,22 @@
           scales: { x: { ticks: { color: '#8b949e' } }, y: { ticks: { color: '#8b949e' }, beginAtZero: true } } }
       });
     }
-    // World map (D3 + TopoJSON)
+
+    // 7. World map
     if (window.d3 && window.topojson && data.geo) {
       drawMap(data.geo);
     }
   }
+
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
   }
+
   async function drawMap(geo) {
-    const el = document.getElementById('map');
-    el.innerHTML = '';
-    const w = el.clientWidth, h = 360;
-    const svg = d3.select(el).append('svg').attr('width', w).attr('height', h);
-    const world = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(r => r.json());
-    const countries = topojson.feature(world, world.objects.countries).features;
-    const counts = new Map(geo.map(g => [g.country, g.n]));
-    const max = Math.max(1, ...geo.map(g => g.n));
-    const color = d3.scaleSequential(d3.interpolateBlues).domain([0, max]);
-    const proj = d3.geoNaturalEarth1().fitSize([w, h], { type: 'Sphere' });
-    const path = d3.geoPath(proj);
-    svg.selectAll('path').data(countries).enter().append('path')
-      .attr('d', path)
-      .attr('fill', d => { const n = counts.get(d.properties.name) || 0; return n ? color(n) : '#21262d'; })
-      .attr('stroke', '#0d1117').attr('stroke-width', 0.4)
-      .append('title').text(d => `${d.properties.name}: ${counts.get(d.properties.name) || 0}`);
+    // (Keep your existing drawMap logic here exactly as it was)
+    // ...
   }
+
   load();
   setInterval(load, 60_000);
 })();
