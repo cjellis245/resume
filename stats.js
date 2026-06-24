@@ -1,4 +1,3 @@
-// Public stats dashboard. Fetches /api/stats every 60s and renders.
 (async function () {
   const $ = (id) => document.getElementById(id);
 
@@ -9,24 +8,23 @@
       if (!r.ok) throw new Error(r.status);
       data = await r.json();
     } catch (e) {
-      $('total').textContent = '—';
       console.error('stats fetch failed', e);
       return;
     }
 
-    // 1. Existing baseline stats
-    $('total').textContent = (data.totalPageViews || 0).toLocaleString();
+    // 1. Baseline stats
+    if ($('total')) $('total').textContent = (data.totalPageViews || 0).toLocaleString();
 
-    // 2. NEW: Render Code Health & Performance Metrics
+    // 2. Performance & Health Metrics
     if ($('errors')) $('errors').textContent = data.jsErrors || 0;
-    if ($('speed')) $('speed').textContent = (data.avgLoadSpeed ? data.avgLoadSpeed.toFixed(2) : '0') + 's';
+    if ($('speed')) $('speed').textContent = (data.avgLoadSpeed || 0).toFixed(2) + 's';
     if ($('apdex')) {
       const score = data.apdexScore || 0;
-      let label = score < 0.85 ? 'Fair' : (score < 0.94 ? 'Good' : 'Excellent');
+      const label = score < 0.85 ? 'Fair' : (score < 0.94 ? 'Good' : 'Excellent');
       $('apdex').textContent = `${score.toFixed(2)} (${label})`;
     }
 
-    // 3. NEW: Browser Environment Bars
+    // 3. Browser Bars
     const barContainer = $('browser-bars');
     if (barContainer && data.browsers) {
       const maxCount = Math.max(...data.browsers.map(b => b.count), 1);
@@ -37,17 +35,15 @@
         </div>`).join('');
     }
 
-    // 4. NEW: Futuristic Terminal Ticker
+    // 4. Terminal Ticker
     const ticker = $('ticker');
     if (ticker && data.timeline) {
-     ticker.innerHTML = data.timeline.map(event => {
-    // 🎯 Force parse the string from Azure into a proper Date object
-    const dateObj = new Date(event.eventTime); 
-    const time = !isNaN(dateObj) ? dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'Unknown';
-    
-    const styledText = event.logText.replace(/\*(.*?)\*/g, '<em>$1</em>');
-    return `<div class="terminal-line"><span class="terminal-time">[${time}]</span><span class="terminal-text">${styledText}</span></div>`;
-}).join('');
+      ticker.innerHTML = data.timeline.map(event => {
+        const dateObj = new Date(event.eventTime);
+        const time = !isNaN(dateObj) ? dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'Unknown';
+        const styledText = (event.logText || '').replace(/\*(.*?)\*/g, '<em>$1</em>');
+        return `<div class="terminal-line"><span class="terminal-time">[${time}]</span><span class="terminal-text">${styledText}</span></div>`;
+      }).join('');
     }
 
     // 5. Tables
@@ -61,25 +57,29 @@
     fillTable('pages', data.topPages || [], 'url', 'pages');
     fillTable('refs',  data.topReferrers || [], 'ref', 'referrers');
 
-    // 6. Hourly trend (Chart.js)
+    // 6. Chart
     if (window.Chart && data.hourly) {
-      const ctx = $('spark').getContext('2d');
-      if (window._chart) window._chart.destroy();
-      window._chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: data.hourly.map(p => new Date(p.t).getHours() + ':00'),
-          datasets: [{ data: data.hourly.map(p => p.n), borderColor: '#58a6ff',
-            backgroundColor: 'rgba(88,166,255,.15)', fill: true, tension: .3, pointRadius: 0 }]
-        },
-        options: { plugins: { legend: { display: false } },
-          scales: { x: { ticks: { color: '#8b949e' } }, y: { ticks: { color: '#8b949e' }, beginAtZero: true } } }
-      });
+      const ctx = $('spark')?.getContext('2d');
+      if (ctx) {
+        if (window._chart) window._chart.destroy();
+        window._chart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: data.hourly.map(p => new Date(p.t).getHours() + ':00'),
+            datasets: [{ data: data.hourly.map(p => p.n), borderColor: '#58a6ff', backgroundColor: 'rgba(88,166,255,.15)', fill: true, tension: .3, pointRadius: 0 }]
+          },
+          options: { plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#8b949e' } }, y: { ticks: { color: '#8b949e' }, beginAtZero: true } } }
+        });
+      }
     }
 
-    // 7. World map
-    if (window.d3 && window.topojson && data.geo) {
-      drawMap(data.geo);
+    // 7. MAP RENDER (Fixed: Isolated and Awaited)
+    try {
+        if (window.d3 && window.topojson && data.geo) {
+            await drawMap(data.geo);
+        }
+    } catch (err) {
+        console.error("Map rendering failed:", err);
     }
   }
 
@@ -88,10 +88,29 @@
   }
 
   async function drawMap(geo) {
-    // (Keep your existing drawMap logic here exactly as it was)
-    // ...
+    const el = document.getElementById('map');
+    if (!el) return;
+    el.innerHTML = '';
+    const w = el.clientWidth, h = 360;
+    const svg = d3.select(el).append('svg').attr('width', w).attr('height', h);
+    
+    // Fetch world data only once or cache it to improve speed
+    const world = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(r => r.json());
+    const countries = topojson.feature(world, world.objects.countries).features;
+    const counts = new Map(geo.map(g => [g.country, g.n]));
+    const max = Math.max(1, ...geo.map(g => g.n));
+    const color = d3.scaleSequential(d3.interpolateBlues).domain([0, max]);
+    const proj = d3.geoNaturalEarth1().fitSize([w, h], { type: 'Sphere' });
+    const path = d3.geoPath(proj);
+    
+    svg.selectAll('path').data(countries).enter().append('path')
+      .attr('d', path)
+      .attr('fill', d => { const n = counts.get(d.properties.name) || 0; return n ? color(n) : '#21262d'; })
+      .attr('stroke', '#0d1117').attr('stroke-width', 0.4)
+      .append('title').text(d => `${d.properties.name}: ${counts.get(d.properties.name) || 0}`);
   }
 
   load();
-  setInterval(load, 60_000);
+  // Set to 5 seconds for "real-time" feel
+  setInterval(load, 5000); 
 })();
