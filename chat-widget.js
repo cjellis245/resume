@@ -1,5 +1,5 @@
 // web/chat-widget.js
-// Floating "Ask my Resume" chat. Streams SSE from /api/chat.
+// Floating "Ask my Resume" chat. Fetches responses from /api/chat.
 
 (function () {
   const API = '/api/chat'; // SWA proxies /api/* to your Function App
@@ -20,7 +20,7 @@
     <div id="cj-chat-log" role="log" aria-live="polite"></div>
     <form id="cj-chat-form">
       <input id="cj-chat-input" type="text" maxlength="500" autocomplete="off"
-             placeholder="e.g. What's Cameron's Azure experience?" />
+             placeholder="e.g. What's Christian's Azure experience?" />
       <button id="cj-chat-send" type="submit">Send</button>
     </form>`;
 
@@ -66,6 +66,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: q }),
       });
+      
       if (!res.ok) {
         botEl.classList.remove('cj-typing');
         botEl.textContent = res.status === 429
@@ -73,26 +74,18 @@
           : `Sorry, something went wrong (${res.status}).`;
         return;
       }
-      const reader = res.body.getReader();
-      const dec = new TextDecoder();
-      let buf = '';
-      let acc = '';
+
+      // 🎯 THE FIX: Parse standard JSON payload directly instead of reading a stream loop
+      const data = await res.json();
       botEl.classList.remove('cj-typing');
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buf += dec.decode(value, { stream: true });
-        const events = buf.split('\n\n');
-        buf = events.pop();
-        for (const ev of events) {
-          const line = ev.split('\n').find(l => l.startsWith('data: '));
-          if (!line) continue;
-          try {
-            const { token } = JSON.parse(line.slice(6));
-            if (token) { acc += token; botEl.textContent = acc; log.scrollTop = log.scrollHeight; }
-          } catch { /* ignore */ }
-        }
+      
+      if (data && data.answer) {
+        botEl.textContent = data.answer;
+        log.scrollTop = log.scrollHeight;
+      } else {
+        botEl.textContent = 'Sorry, received an unexpected response format.';
       }
+
     } catch (err) {
       botEl.classList.remove('cj-typing');
       botEl.textContent = 'Network error — please try again.';
