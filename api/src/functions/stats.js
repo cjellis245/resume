@@ -56,8 +56,11 @@ app.http('stats', {
     aiQuery(`pageViews | where timestamp > ago(7d) | summarize count = count() by browser = client_Browser | top 5 by count desc`),
     
     // NEW: Recent Activity Log
-aiQuery(`pageViews | project eventTime = timestamp, logText = strcat("Access from ", client_CountryOrRegion, " via ", client_Browser, " to *", url, "*") | top 10 by eventTime desc`)
-  ]);
+aiQuery(`
+    union (pageViews | project eventTime = timestamp, logText = strcat("Visit: ", url)),
+          (customEvents | project eventTime = timestamp, logText = strcat("Event: ", name))
+    | top 15 by eventTime desc
+`)
 
   return {
     status: 200,
