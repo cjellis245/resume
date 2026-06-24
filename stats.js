@@ -40,11 +40,14 @@
     // 4. NEW: Futuristic Terminal Ticker
     const ticker = $('ticker');
     if (ticker && data.timeline) {
-      ticker.innerHTML = data.timeline.map(event => {
-        const time = new Date(event.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        const styledText = event.logText.replace(/\*(.*?)\*/g, '<em>$1</em>');
-        return `<div class="terminal-line"><span class="terminal-time">[${time}]</span><span class="terminal-text">${styledText}</span></div>`;
-      }).join('');
+     ticker.innerHTML = data.timeline.map(event => {
+    // 🎯 Force parse the string from Azure into a proper Date object
+    const dateObj = new Date(event.eventTime); 
+    const time = !isNaN(dateObj) ? dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'Unknown';
+    
+    const styledText = event.logText.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    return `<div class="terminal-line"><span class="terminal-time">[${time}]</span><span class="terminal-text">${styledText}</span></div>`;
+}).join('');
     }
 
     // 5. Tables
