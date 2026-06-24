@@ -551,14 +551,16 @@
 })();
     </script>
 
-    <script type="text/javascript">
+   <script type="text/javascript">
 !function(cfg){function e(){cfg.onInit&&cfg.onInit(n)}var x,w,D,t,E,n,C=window,O=document,b=C.location,q="script",I="ingestionendpoint",L="disableExceptionTracking",j="ai.device.";"instrumentationKey"[x="toLowerCase"](),w="crossOrigin",D="POST",t="appInsightsSDK",E=cfg.name||"appInsights",(cfg.name||C[t])&&(C[t]=E);var p=C[E]||function(g){var f=!1,m=!1,h={initialize:!0,queue:[],sv:"8",version:2,config:g};function v(e,t){var n={},i="Browser";function a(e){e=""+e;return 1===e.length?"0"+e:e}return n[j+"id"]=i[x](),n[j+"type"]=i,n["ai.operation.name"]=O&&O.title||"",n["ai.internal.sdkVersion"]="javascript:snippet_"+(h.sv||h.version),{time:function(){var e=new Date;return e.getUTCFullYear()+"-"+a(1+e.getUTCMonth())+"-"+a(e.getUTCDate())+"T"+a(e.getUTCHours())+":"+a(e.getUTCMinutes())+":"+a(e.getUTCSeconds())+"."+((e.getUTCMilliseconds()/1e3).toFixed(3)+"").slice(2,5)+"Z"}(),iKey:e,name:"Microsoft.ApplicationInsights."+e.replace(/-/g,"")+"."+t,sampleRate:100,tags:n,data:{baseData:{ver:2}},ver:undefined,seq:"1",aiDataContract:undefined}}var n=g.url||cfg.src;if(n){function i(e){var t,n,i,a,r,o,s,c,u,l,d;f=!0,h.queue=[],m||(m=!0,t=n,s=function(){var e=function(e,t){var n,i=C[t="XMLHttpRequest"];if(i)try{var a=new i;a.open(D,e,!0),a.setRequestHeader("Content-type","application/json"),a.send()}catch(e){}}(t,h.config.url||cfg.src)},c=cfg.useXhr,c?s():e.onload=s,e.onerror=function(){var e=t.message||"Failed to load Application Insights script";var n={name:"SDKLoadFailed",message:e};(h.queue||[]).push(n)},h.SeverityLevel=h.SeverityLevel||{},h.SeverityLevel.Critical=4)}n=function(){var e=O.createElement(q);e.src=cfg.src;var t=cfg[w];return!t&&""!==t||"undefined"==e[w]||(e[w]=t),e.onload=i,e.onerror=i,e.onreadystatechange=function(e,t){"loaded"!==e.readyState&&"complete"!==e.readyState||i(0,t)},cfg.ld&&cfg.ld<0?O.getElementsByTagName("head")[0].appendChild(e):setTimeout(function(){O.getElementsByTagName(q)[0].parentNode.appendChild(e)},cfg.ld||0),e}(),"undefined"==typeof window.appInsights&&(C[E]=h,e())}return h}(cfg);
-// Loop to safely register the SDK methods as asynchronous proxy stubs
 var trackingMethods=["trackEvent","trackPageView","trackException","trackTrace","trackMetric","trackPageViewPerformance","startTrackPage","stopTrackPage"];
 for(var i=0;i<trackingMethods.length;i++){!function(name){p[name]=function(){var args=arguments;p.queue.push(function(){p[name].apply(p,args)})}}(trackingMethods[i])}
 (C[E]=p).queue&&0===p.queue.length?p.trackPageView({}):e()})({
   src: "https://js.monitor.azure.com/next/ai.8.gbl.min.js",
-  connectionString: "InstrumentationKey=a41ba89e-6bf3-4710-a85d-9c134cd8d5a0;IngestionEndpoint=https://centralus-2.in.applicationinsights.azure.com/;LiveEndpoint=https://centralus.livediagnostics.monitor.azure.com/;ApplicationId=c10d6f59-ddb4-44bb-b915-e7421e5c629b" // 👈 Drop your active Azure connection string here!
+  // 🎯 FIXED: Wrapped connectionString cleanly inside the required 'cfg' block
+  cfg: {
+    connectionString: "InstrumentationKey=a41ba89e-6bf3-4710-a85d-9c134cd8d5a0;IngestionEndpoint=https://centralus-2.in.applicationinsights.azure.com/;LiveEndpoint=https://centralus.livediagnostics.monitor.azure.com/;ApplicationId=c10d6f59-ddb4-44bb-b915-e7421e5c629b"
+  }
 });
 </script>
 
