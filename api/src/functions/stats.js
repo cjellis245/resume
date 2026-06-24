@@ -56,7 +56,7 @@ app.http('stats', {
     aiQuery(`pageViews | where timestamp > ago(7d) | summarize count = count() by browser = client_Browser | top 5 by count desc`),
     
     // NEW: Recent Activity Log
-    aiQuery(`pageViews | project eventTime = timestamp, logText = strcat("User: ", url) | top 10 by eventTime desc`)
+aiQuery(`pageViews | project eventTime = timestamp, logText = strcat("Access from ", client_CountryOrRegion, " via ", client_Browser, " to *", url, "*") | top 10 by eventTime desc`)
   ]);
 
   return {
