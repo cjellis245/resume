@@ -158,53 +158,54 @@
                 flex-direction: column;
             }
         }
-      /* Violent screen shake for anticipation */
-@keyframes intense-shake {
-    0% { transform: translate(1px, 1px) rotate(0deg); }
-    10% { transform: translate(-2px, -3px) rotate(-1deg); }
-    20% { transform: translate(-4px, 0px) rotate(2deg); }
-    30% { transform: translate(0px, 3px) rotate(0deg); }
-    40% { transform: translate(2px, -1px) rotate(1deg); }
-    50% { transform: translate(-2px, 4px) rotate(-2deg); }
-    60% { transform: translate(-4px, 2px) rotate(0deg); }
-    70% { transform: translate(3px, 2px) rotate(-1deg); }
-    80% { transform: translate(-2px, -2px) rotate(2deg); }
-    90% { transform: translate(3px, 3px) rotate(0deg); }
-    100% { transform: translate(1px, -3px) rotate(-1deg); }
-}
 
-.core-detonation {
-    animation: intense-shake 0.5s infinite;
-}
+        /* Violent screen shake for anticipation */
+        @keyframes intense-shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-2px, -3px) rotate(-1deg); }
+            20% { transform: translate(-4px, 0px) rotate(2deg); }
+            30% { transform: translate(0px, 3px) rotate(0deg); }
+            40% { transform: translate(2px, -1px) rotate(1deg); }
+            50% { transform: translate(-2px, 4px) rotate(-2deg); }
+            60% { transform: translate(-4px, 2px) rotate(0deg); }
+            70% { transform: translate(3px, 2px) rotate(-1deg); }
+            80% { transform: translate(-2px, -2px) rotate(2deg); }
+            90% { transform: translate(3px, 3px) rotate(0deg); }
+            100% { transform: translate(1px, -3px) rotate(-1deg); }
+        }
 
-/* CRITICAL FOR MOBILE: Prevents browser from zooming out or scrolling when items fly away */
-.viewport-lock {
-    overflow: hidden !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    position: relative !important;
-}
+        .core-detonation {
+            animation: intense-shake 0.5s infinite;
+        }
 
-/* Pulsing energy glow for the button during detonation */
-@keyframes button-overload {
-    0% { box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4); transform: scale(1); }
-    100% { box-shadow: 0 0 35px #e74c3c, 0 0 60px rgba(231, 76, 60, 0.6); transform: scale(1.1); }
-}
+        /* CRITICAL FOR MOBILE: Prevents browser from zooming out or scrolling when items fly away */
+        .viewport-lock {
+            overflow: hidden !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            position: relative !important;
+        }
 
-.btn-overload {
-    animation: button-overload 0.2s infinite alternate !important;
-    background-color: #ff331f !important;
-}
+        /* Pulsing energy glow for the button during detonation */
+        @keyframes button-overload {
+            0% { box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4); transform: scale(1); }
+            100% { box-shadow: 0 0 35px #e74c3c, 0 0 60px rgba(231, 76, 60, 0.6); transform: scale(1.1); }
+        }
 
-/* Glides button perfectly to the absolute viewport center on both desktop & mobile */
-.rebuild-center {
-    position: fixed !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) scale(1.2) !important;
-    z-index: 999999 !important;
-    margin: 0 !important;
-}
+        .btn-overload {
+            animation: button-overload 0.2s infinite alternate !important;
+            background-color: #ff331f !important;
+        }
+
+        /* Glides button perfectly to the absolute viewport center on both desktop & mobile */
+        .rebuild-center {
+            position: fixed !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) scale(1.2) !important;
+            z-index: 999999 !important;
+            margin: 0 !important;
+        }
     </style>
 </head>
 <body>
@@ -239,17 +240,18 @@
 
         <section id="experience">
             <h2>Experience</h2>
-<div class="job">
+            <div class="job">
                 <div class="job-header">
                     <span class="job-title">Court Reporter - Ministry of Justice</span>
                     <span class="job-date">MAY 2026 - PRESENT</span>
                 </div>
                 <ul>
                     <li>Court reporting and stuff...</li>
-                    <li>Maybe eventually/li>
+                    <li>Maybe eventually</li>
                     <li>I'll finish it</li>
                 </ul>
             </div>
+            
             <div class="job">
                 <div class="job-header">
                     <span class="job-title">Customer Champion - One New Zealand</span>
@@ -408,14 +410,15 @@
             <h2>Referees</h2>
             <p>Available on request</p>
         </section>
+        
         <div style="text-align: center; margin-top: 40px;">
-    <button id="chaos-btn" style="background: #e74c3c; color: white; border: none; padding: 12px 28px; font-size: 1.1em; border-radius: 50px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4); transition: all 0.2s ease;">
-        ⚠️ Initiate Self-Destruct
-    </button>
-</div>
+            <button id="chaos-btn" style="background: #e74c3c; color: white; border: none; padding: 12px 28px; font-size: 1.1em; border-radius: 50px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4); transition: all 0.2s ease;">
+                ⚠️ Initiate Self-Destruct
+            </button>
+        </div>
     </div>
 
- <script>
+<script>
 (function () {
   const sid = (crypto.randomUUID && crypto.randomUUID()) ||
               (Date.now() + '-' + Math.random().toString(36).slice(2));
@@ -443,7 +446,8 @@
   });
 })();
 </script>
-    <script>
+
+<script>
 (function() {
     const btn = document.getElementById('chaos-btn');
     if (!btn) return;
@@ -452,6 +456,11 @@
     const targets = document.querySelectorAll('body > *:not(script):not(style), header, section, main > section');
 
     function executeExplosion() {
+        // Log detonation event directly to Azure App Insights
+        if (window.appInsights) {
+            window.appInsights.trackEvent({ name: 'SelfDestructInitiated' });
+        }
+
         // 1. Lock viewports to kill mobile zooming bugs instantly
         document.body.classList.add('core-detonation');
         document.documentElement.classList.add('viewport-lock');
@@ -502,6 +511,11 @@
     }
 
     function executeRewind() {
+        // Log reconstruction event directly to Azure App Insights
+        if (window.appInsights) {
+            window.appInsights.trackEvent({ name: 'InfrastructureRebuilt' });
+        }
+
         btn.onclick = null; // Lock button instantly to prevent multi-click spam glitches
         btn.textContent = '🛠️ REASSEMBLING...';
         btn.style.background = '#3498db';
@@ -541,15 +555,15 @@
 
                 // Return button loop back to initial explosion hook cleanly
                 btn.onclick = executeExplosion;
-            }, 1200); // Wait for the final visual layout settle to drop inline modifications
+            }, 1200);
 
-        }, 2500); // Let elements start tracking backwards for 2.5 seconds before button slides home
+        }, 2500); 
     }
 
     // Initial assignment
     btn.onclick = executeExplosion;
 })();
-    </script>
+</script>
     
 <script type="text/javascript">
 (function () {
@@ -562,7 +576,7 @@
             queue: [],
             sv: "8", 
             version: 2.0,
-            config: config.cfg // 🎯 FIXED: Points the engine directly to your connection settings
+            config: config.cfg
         };
 
         var trackingMethods = ["trackEvent", "trackPageView", "trackException", "trackTrace", "trackMetric", "trackPageViewPerformance", "startTrackPage", "stopTrackPage"];
@@ -609,6 +623,6 @@
 </script>
 
     <link rel="stylesheet" href="/chat-widget.css" />
-<script defer src="/chat-widget.js"></script>
+    <script defer src="/chat-widget.js"></script>
 </body>
 </html>
