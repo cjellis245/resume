@@ -81,9 +81,14 @@ async function retrieve(question, k = 5) {
   const vector = await embed(question);
   const results = await getSearch().search(question, {
     vectorSearchOptions: {
-      queries: [{ kind: 'vector', vector, kNearestNeighborsCount: k, fields: ['embedding'] }],
+      queries: [{ 
+        kind: 'vector', 
+        vector, 
+        kNearestNeighborsCount: k, 
+        fields: ['text_vector'] // 👈 Updated to target the new RAG wizard's vector schema 
+      }],
     },
-    select: ['title', 'content'], // 👈 Fixed: Now requests 'title' and 'content' instead of 'id' and 'section'
+    select: ['title', 'content'],
     top: k,
   });
   const chunks = [];
@@ -119,7 +124,7 @@ app.http('chat', {
     try {
       const contextChunks = await retrieve(question, 5);
       const contextBlock = contextChunks
-        .map((c, i) => `[§${c.title || `Chunk${i + 1}`}]\n${c.content}`) // 👈 Fixed: Uses 'c.title' to read your search index schema properly
+        .map((c, i) => `[§${c.title || `Chunk${i + 1}`}]\n${c.content}`)
         .join('\n\n---\n\n');
 
       const completion = await getOpenAI().chat.completions.create({
