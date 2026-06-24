@@ -37,27 +37,46 @@ app.http('stats', {
 
     if (req.method === 'OPTIONS') return { status: 204, headers };
 
-    try {
-      const [total, hourly, topPages, topRefs, geo] = await Promise.all([
-        aiQuery(`pageViews | where timestamp > ago(7d) | summarize total = count()`),
-        // 🎯 Fixed: Explicitly named binned column 't' to avoid Azure API naming ambiguities
-        aiQuery(`pageViews | where timestamp > ago(24h) | summarize n = count() by t = bin(timestamp, 1h) | order by t asc`),
-        aiQuery(`pageViews | where timestamp > ago(7d) | summarize n = count() by url | top 5 by n desc`),
-        aiQuery(`pageViews | where timestamp > ago(7d) | where isnotempty(tostring(customDimensions.referrer)) | summarize n = count() by ref = tostring(customDimensions.referrer) | top 5 by n desc`),
-        aiQuery(`pageViews | where timestamp > ago(7d) | summarize n = count() by country = tostring(client_CountryOrRegion) | top 20 by n desc`),
-      ]);
+  try {
+  // Execute all queries in parallel
+  const [total, hourly, topPages, topRefs, geo, health, ux, browserData, logs] = await Promise.all([
+    aiQuery(`pageViews | where timestamp > ago(7d) | summarize total = count()`),
+    aiQuery(`pageViews | where timestamp > ago(24h) | summarize n = count() by t = bin(timestamp, 1h) | order by t asc`),
+    aiQuery(`pageViews | where timestamp > ago(7d) | summarize n = count() by url | top 5 by n desc`),
+    aiQuery(`pageViews | where timestamp > ago(7d) | where isnotempty(tostring(customDimensions.referrer)) | summarize n = count() by ref = tostring(customDimensions.referrer) | top 5 by n desc`),
+    aiQuery(`pageViews | where timestamp > ago(7d) | summarize n = count() by country = tostring(client_CountryOrRegion) | top 20 by n desc`),
+    
+    // NEW: JS Errors (count exceptions)
+    aiQuery(`exceptions | where timestamp > ago(7d) | count`),
+    
+    // NEW: Performance (Speed & Apdex)
+    aiQuery(`pageViews | where timestamp > ago(7d) | summarize avgLoad = avg(duration), apdex = percentile(duration, 95) by bin(timestamp, 1d) | summarize avgLoadSpeed = avg(avgLoad)/1000, apdexScore = 1 - (sumif(apdex, apdex > 3000)/sum(apdex))`),
+    
+    // NEW: Browser Distribution
+    aiQuery(`pageViews | where timestamp > ago(7d) | summarize count = count() by browser = client_Browser | top 5 by count desc`),
+    
+    // NEW: Recent Activity Log
+    aiQuery(`pageViews | project time = timestamp, logText = strcat("User visited: *", url, "*") | top 10 by time desc`)
+  ]);
 
-      return {
-        status: 200,
-        headers,
-        jsonBody: {
-          total: total[0]?.total || 0,
-          hourly: hourly.map(r => ({ t: r.t, n: r.n })), // Maps directly to explicit 'r.t' column
-          topPages: topPages.map(r => ({ url: r.url, n: r.n })),
-          topReferrers: topRefs.map(r => ({ ref: r.ref, n: r.n })),
-          geo: geo.map(r => ({ country: r.country, n: r.n })),
-        },
-      };
+  return {
+    status: 200,
+    headers,
+    jsonBody: {
+      totalPageViews: total[0]?.total || 0,
+      hourly: hourly.map(r => ({ t: r.t, n: r.n })),
+      topPages: topPages.map(r => ({ url: r.url, n: r.n })),
+      topReferrers: topRefs.map(r => ({ ref: r.ref, n: r.n })),
+      geo: geo.map(r => ({ country: r.country, n: r.n })),
+      
+      // Mapped new metrics
+      jsErrors: health[0]?.count || 0,
+      avgLoadSpeed: ux[0]?.avgLoadSpeed || 0,
+      apdexScore: ux[0]?.apdexScore || 0,
+      browsers: browserData,
+      timeline: logs
+    },
+  };
     } catch (e) {
       context.error('stats failed', e);
       return { 
