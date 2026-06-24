@@ -85,10 +85,10 @@ async function retrieve(question, k = 5) {
         kind: 'vector', 
         vector, 
         kNearestNeighborsCount: k, 
-        fields: ['text_vector'] // 👈 Updated to target the new RAG wizard's vector schema 
+        fields: ['text_vector'] // 🎯 Targets your vector field
       }],
     },
-    select: ['title', 'content'],
+    select: ['title', 'chunk'], // 👈 Fixed: Grabs 'chunk' instead of 'content'
     top: k,
   });
   const chunks = [];
@@ -124,7 +124,7 @@ app.http('chat', {
     try {
       const contextChunks = await retrieve(question, 5);
       const contextBlock = contextChunks
-        .map((c, i) => `[§${c.title || `Chunk${i + 1}`}]\n${c.content}`)
+        .map((c, i) => `[§${c.title || `Chunk${i + 1}`}]\n${c.chunk}`) // 👈 Fixed: Maps 'c.chunk' instead of 'c.content'
         .join('\n\n---\n\n');
 
       const completion = await getOpenAI().chat.completions.create({
