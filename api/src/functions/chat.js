@@ -15,7 +15,7 @@ function getOpenAI() {
     _openai = new AzureOpenAI({
       endpoint: process.env.OPENAI_ENDPOINT,
       apiKey: process.env.OPENAI_KEY,
-      apiVersion: '2024-10-21',
+      apiVersion: '2025-04-14',
     });
   }
   return _openai;
