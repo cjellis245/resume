@@ -1,6 +1,6 @@
 const { app } = require('@azure/functions');
 const { SearchClient, AzureKeyCredential } = require('@azure/search-documents');
-const { OpenAI } = require('openai'); // 👈 Changed to standard OpenAI client
+const { OpenAI } = require('openai'); // 👈 Uses the standard OpenAI client from your example
 
 const ALLOWED_ORIGINS = new Set([
   'https://cjellisnz.uk',
@@ -15,7 +15,7 @@ function getOpenAI() {
     if (!process.env.OPENAI_ENDPOINT || !process.env.OPENAI_KEY) {
       throw new Error('OPENAI_ENDPOINT / OPENAI_KEY app settings missing');
     }
-    // 👈 Reconfigured to use baseURL and stripped the apiVersion date string
+    // 👈 Configured to match the exact layout from your Foundry example snippet
     _openai = new OpenAI({
       baseURL: process.env.OPENAI_ENDPOINT,
       apiKey: process.env.OPENAI_KEY,
