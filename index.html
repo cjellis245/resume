@@ -551,7 +551,7 @@
 })();
     </script>
     
- <script type="text/javascript">
+<script type="text/javascript">
 (function () {
     var sdkName = "appInsights";
     window.appInsightsSDK = sdkName;
@@ -560,12 +560,11 @@
         var instance = {
             initialize: true,
             queue: [],
-            sv: "8",
-            version: 2,
-            config: config
+            sv: "8", 
+            version: 2.0,
+            config: config.cfg // 🎯 FIXED: Points the engine directly to your connection settings
         };
 
-        // Set up proxy stubs for tracking methods so calls can be queued before the script loads
         var trackingMethods = ["trackEvent", "trackPageView", "trackException", "trackTrace", "trackMetric", "trackPageViewPerformance", "startTrackPage", "stopTrackPage"];
         for (var i = 0; i < trackingMethods.length; i++) {
             (function (methodName) {
@@ -578,7 +577,6 @@
             })(trackingMethods[i]);
         }
 
-        // Dynamically inject the Azure Application Insights SDK script
         var script = document.createElement("script");
         script.src = config.src;
         if (config.crossOrigin) {
@@ -601,14 +599,11 @@
     }({
         src: "https://js.monitor.azure.com/next/ai.3.gbl.min.js",
         cfg: {
-            // Your active connection string is safely nested here
             connectionString: "InstrumentationKey=a41ba89e-6bf3-4710-a85d-9c134cd8d5a0;IngestionEndpoint=https://centralus-2.in.applicationinsights.azure.com/;LiveEndpoint=https://centralus.livediagnostics.monitor.azure.com/;ApplicationId=c10d6f59-ddb4-44bb-b915-e7421e5c629b"
         }
     });
 
     window[sdkName] = queueObject;
-    
-    // Fire the initial page view tracking call smoothly
     queueObject.trackPageView({});
 })();
 </script>
