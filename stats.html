@@ -1,106 +1,93 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Live site analytics · cjellisnz.uk</title>
-<meta name="description" content="Live visitor analytics for cjellisnz.uk — pages, referrers, geography. Built on Azure App Insights." />
-<link rel="canonical" href="https://cjellisnz.uk/stats" />
-<style>
-  :root { color-scheme: dark; }
-  body { margin: 0; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; background: #0d1117; color: #e6edf3; }
-  header { padding: 24px; border-bottom: 1px solid #21262d; }
-  header h1 { margin: 0 0 4px; font-size: 22px; }
-  header p  { margin: 0; color: #8b949e; font-size: 14px; }
-  main { max-width: 1100px; margin: 0 auto; padding: 24px; display: grid; gap: 20px; grid-template-columns: 1fr 1fr; }
-  .card { background: #161b22; border: 1px solid #21262d; border-radius: 10px; padding: 16px; }
-  .card h2 { margin: 0 0 10px; font-size: 14px; font-weight: 600; color: #8b949e; text-transform: uppercase; letter-spacing: .08em; }
-  .span-2 { grid-column: 1 / -1; }
-  .stat { font-size: 36px; font-weight: 700; }
-  table { width: 100%; border-collapse: collapse; font-size: 14px; }
-  td { padding: 6px 0; border-bottom: 1px solid #21262d; }
-  td.num { text-align: right; color: #58a6ff; font-variant-numeric: tabular-nums; }
-  #map { width: 100%; height: 360px; }
-  #spark { width: 100%; height: 120px; }
-  footer { text-align: center; color: #6e7681; padding: 32px; font-size: 12px; }
-  a { color: #58a6ff; }
-  @media (max-width: 760px) { main { grid-template-columns: 1fr; } }
-
-  /* 🚀 NEW FUTURISTIC METRIC STYLES */
-  .bar-container { margin: 12px 0; font-size: 13px; }
-  .bar-label { display: flex; justify-content: space-between; margin-bottom: 4px; }
-  .bar-track { background: #21262d; height: 6px; border-radius: 3px; overflow: hidden; }
-  .bar-fill { background: #58a6ff; height: 100%; width: 0%; transition: width 0.6s ease; }
-  
-  /* Cyberpunk Terminal Ticker Style */
-  .terminal { background: #010409; border: 1px solid #30363d; border-radius: 6px; padding: 14px; font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, monospace; font-size: 13px; color: #7ee787; height: 180px; overflow-y: auto; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
-  .terminal-line { margin-bottom: 8px; display: flex; align-items: flex-start; }
-  .terminal-time { color: #8b949e; margin-right: 12px; flex-shrink: 0; }
-  .terminal-text { color: #e6edf3; }
-  .terminal-text em { color: #ff7b72; font-style: normal; font-weight: bold; } /* Highlights buttons/actions */
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Live Analytics — cjellisnz.uk</title>
+  <meta name="description" content="Live visitor analytics dashboard powered by Azure Application Insights." />
+  <link rel="stylesheet" href="/stats.css" />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 </head>
 <body>
-<header>
-  <h1>Live site analytics</h1>
-  <p>Aggregated, anonymised telemetry from the last 7 days · refreshes every 60 s · powered by Azure Application Insights</p>
-</header>
-<main>
-  <section class="card span-2">
-    <h2>Visitor map</h2>
-    <div id="map"></div>
-  </section>
-  
-  <section class="card">
-    <h2>Total page views (7d)</h2>
-    <div class="stat" id="total">–</div>
-  </section>
-  <section class="card">
-    <h2>Hourly trend</h2>
-    <canvas id="spark"></canvas>
-  </section>
-
-  <section class="card">
-    <h2>JS Errors Caught (7d)</h2>
-    <div class="stat" id="errors" style="color: #ff7b72;">–</div>
-  </section>
-  <section class="card">
-    <h2>Avg Page Load Speed</h2>
-    <div class="stat" id="speed" style="color: #56d364;">–s</div>
-  </section>
-
-  <section class="card">
-    <h2>User UX Apdex Score</h2>
-    <div class="stat" id="apdex" style="color: #d2a8ff;">–</div>
-  </section>
-  <section class="card">
-    <h2>Top Environments</h2>
-    <div id="browser-bars">
+  <header class="topbar">
+    <a href="/" class="brand">← cjellisnz.uk</a>
+    <div class="live-pill"><span class="dot"></span> LIVE · Azure Application Insights</div>
+    <div class="refresh">Auto-refresh <span id="countdown">60</span>s</div>
+  </header>
+  <main class="dash">
+    <!-- KPI ROW -->
+    <section class="kpi-row">
+      <div class="kpi"><span class="kpi-label">Page Views (7d)</span><span class="kpi-value" id="kpi-views">—</span></div>
+      <div class="kpi"><span class="kpi-label">Unique Visitors</span><span class="kpi-value" id="kpi-users">—</span></div>
+      <div class="kpi"><span class="kpi-label">Sessions</span><span class="kpi-value" id="kpi-sessions">—</span></div>
+      <div class="kpi"><span class="kpi-label">Avg Session</span><span class="kpi-value" id="kpi-session-dur">—</span></div>
+      <div class="kpi"><span class="kpi-label">Bounce Rate</span><span class="kpi-value" id="kpi-bounce">—</span></div>
+      <div class="kpi"><span class="kpi-label">Avg Load</span><span class="kpi-value" id="kpi-load">—</span></div>
+      <div class="kpi"><span class="kpi-label">JS Errors (7d)</span><span class="kpi-value" id="kpi-errors">—</span></div>
+      <div class="kpi"><span class="kpi-label">New / Returning</span><span class="kpi-value" id="kpi-newret">—</span></div>
+    </section>
+    <!-- TRENDS -->
+    <section class="grid-2">
+      <div class="card">
+        <h3>Hourly traffic (24h)</h3>
+        <canvas id="chart-hourly" height="160"></canvas>
       </div>
-  </section>
-
-  <section class="card">
-    <h2>Top pages</h2>
-    <table id="pages"></table>
-  </section>
-  <section class="card">
-    <h2>Top referrers</h2>
-    <table id="refs"></table>
-  </section>
-
-  <section class="card span-2">
-    <h2>System Event Logs (Live Feed)</h2>
-    <div class="terminal" id="ticker">
-      <div class="terminal-line"><span class="terminal-time">[00:00:00]</span><span class="terminal-text">Establishing connection to Azure Log Analytics pipeline... ready.</span></div>
-    </div>
-  </section>
-</main>
-<footer>No cookies, no personal data. Source: <a href="https://github.com/cjellis245/resume">github.com/cjellis245/resume</a></footer>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"
-  integrity="sha384-bs64Ej1Y+RXMmZdz8Hv+jeo2OkjB8YEH59gx6FwckIN6CDnt5XbnHnRMdGSwy3Ms" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
-<script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
-<script src="/stats.js"></script>
+      <div class="card">
+        <h3>Daily traffic (30d)</h3>
+        <canvas id="chart-daily" height="160"></canvas>
+      </div>
+    </section>
+    <!-- MAP -->
+    <section class="card map-card">
+      <div class="card-header">
+        <h3>Visitors around the world</h3>
+        <span class="muted" id="map-legend">Last 7 days</span>
+      </div>
+      <div id="map"></div>
+    </section>
+    <!-- TECH BREAKDOWN -->
+    <section class="grid-3">
+      <div class="card"><h3>Browsers</h3><div class="bars" id="bars-browsers"></div></div>
+      <div class="card"><h3>Operating systems</h3><div class="bars" id="bars-os"></div></div>
+      <div class="card"><h3>Device type</h3><div class="bars" id="bars-deviceTypes"></div></div>
+      <div class="card"><h3>Devices</h3><div class="bars" id="bars-devices"></div></div>
+      <div class="card"><h3>Screen sizes</h3><div class="bars" id="bars-screens"></div></div>
+      <div class="card"><h3>Languages</h3><div class="bars" id="bars-langs"></div></div>
+    </section>
+    <!-- CONTENT -->
+    <section class="grid-2">
+      <div class="card">
+        <h3>Top pages</h3>
+        <table class="data"><tbody id="tbl-pages"></tbody></table>
+      </div>
+      <div class="card">
+        <h3>Top referrers</h3>
+        <table class="data"><tbody id="tbl-refs"></tbody></table>
+      </div>
+      <div class="card">
+        <h3>Top cities</h3>
+        <table class="data"><tbody id="tbl-cities"></tbody></table>
+      </div>
+      <div class="card">
+        <h3>Slowest pages</h3>
+        <table class="data"><tbody id="tbl-slow"></tbody></table>
+      </div>
+    </section>
+    <!-- ACTIVITY FEED -->
+    <section class="card feed-card">
+      <div class="card-header">
+        <h3>System event log</h3>
+        <span class="muted">Live · last 25 events</span>
+      </div>
+      <ul class="feed" id="feed"></ul>
+    </section>
+    <footer class="foot">
+      <span>Telemetry: Azure Application Insights · KQL via Function App · IP anonymised</span>
+    </footer>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
+  <script src="/stats.js" defer></script>
 </body>
 </html>
