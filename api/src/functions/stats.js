@@ -20,11 +20,17 @@ async function aiQuery(kql) {
 }
 
 app.http('stats', {
-  methods: ['GET'],
+  methods: ['GET', 'OPTIONS'],
   authLevel: 'anonymous',
   handler: async (req, context) => {
+    const headers = {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*'
+    };
+
+    if (req.method === 'OPTIONS') return { status: 204, headers };
+
     try {
-      // Execute queries with defensive defaults
       const [kpi, hourly, daily, topPages, topRefs, geo, cities, browsers, os, devices, health, ux, slow, feed] = await Promise.all([
         aiQuery(`pageViews | where timestamp > ago(7d) | summarize totalViews = count(), uniqueUsers = dcount(user_Id), totalSessions = dcount(session_Id)`),
         aiQuery(`pageViews | where timestamp > ago(24h) | summarize n = count() by t = bin(timestamp, 1h) | order by t asc`),
@@ -39,12 +45,13 @@ app.http('stats', {
         aiQuery(`exceptions | where timestamp > ago(7d) | summarize errCount = count()`),
         aiQuery(`pageViews | where timestamp > ago(7d) | summarize avgLoad = avg(duration), apdex = percentile(duration, 95) by bin(timestamp, 1d) | summarize avgLoadSpeed = avg(avgLoad)/1000, apdexScore = 1 - (sumif(apdex, apdex > 3000)/sum(apdex))`),
         aiQuery(`pageViews | where timestamp > ago(7d) | summarize avgMs = toint(avg(duration)) by url = tostring(url) | top 5 by avgMs desc`),
-        aiQuery(`union (pageViews | project t = timestamp, kind = "view", text = strcat("Visited ", url)), (customEvents | project t = timestamp, kind = "event", text = strcat("Event: ", name)) | top 25 by t desc`)
+        // FIXED: Using itemKind to avoid reserved keyword 'kind'
+        aiQuery(`union (pageViews | project t = timestamp, itemKind = "view", text = strcat("Visited ", url)), (customEvents | project t = timestamp, itemKind = "event", text = strcat("Event: ", name)) | top 25 by t desc`)
       ]);
 
       return {
         status: 200,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        headers,
         jsonBody: {
           totalPageViews: kpi[0]?.totalViews || 0,
           uniqueUsers: kpi[0]?.uniqueUsers || 0,
@@ -54,11 +61,12 @@ app.http('stats', {
           jsErrors: health[0]?.errCount || 0,
           avgLoadSpeed: ux[0]?.avgLoadSpeed || 0,
           apdexScore: ux[0]?.apdexScore || 0,
-          timeline: feed
+          // Map itemKind back to the 'kind' property the frontend expects
+          timeline: feed.map(r => ({ t: r.t, text: r.text, kind: r.itemKind }))
         }
       };
     } catch (e) {
-      return { status: 500, jsonBody: { error: e.message } };
+      return { status: 500, headers, jsonBody: { error: e.message } };
     }
   }
 });
