@@ -41,7 +41,7 @@ app.http('stats', {
         browsers, os, deviceTypes, devices, 
         health, ux, slow, feed
       ] = await Promise.all([
-        // KPIs - FIXED: Changed 'views' to 'totalViews' to avoid reserved keyword clash
+        // KPIs
         aiQuery(`pageViews | where timestamp > ago(7d) | summarize totalViews = count(), uniqueUsers = dcount(user_Id), totalSessions = dcount(session_Id)`),
         
         // Hourly (24h)
@@ -64,9 +64,13 @@ app.http('stats', {
         aiQuery(`pageViews | where timestamp > ago(7d) | summarize n = count() by name = client_Type | top 5 by n desc`),
         aiQuery(`pageViews | where timestamp > ago(7d) | summarize n = count() by name = client_Model | top 5 by n desc`),
         
-        // Performance & Health - FIXED: using summarize count() to strictly map JSON keys
-        aiQuery(`exceptions | where timestamp > ago(7d) | summarize count = count()`),
-        aiQuery(`pageViews | where timestamp > ago(7d) | summarize avgLoad = avg(duration), apdex = percentile(duration, 95) | summarize avgLoadSpeed = avg(avgLoad)/1000, apdexScore = 1 - (sumif(apdex, apdex > 3000)/sum(apdex))`),
+        // Performance & Health - FIXED: Changed 'count = count()' to 'errCount = count()'
+        aiQuery(`exceptions | where timestamp > ago(7d) | summarize errCount = count()`),
+        
+        // UX - FIXED: Restored 'by bin(timestamp, 1d)' to fix the Apdex math execution
+        aiQuery(`pageViews | where timestamp > ago(7d) | summarize avgLoad = avg(duration), apdex = percentile(duration, 95) by bin(timestamp, 1d) | summarize avgLoadSpeed = avg(avgLoad)/1000, apdexScore = 1 - (sumif(apdex, apdex > 3000)/sum(apdex))`),
+        
+        // Slow Pages
         aiQuery(`pageViews | where timestamp > ago(7d) | summarize avgMs = toint(avg(duration)) by url | top 5 by avgMs desc`),
 
         // RICH ACTIVITY FEED
@@ -82,34 +86,28 @@ app.http('stats', {
         status: 200,
         headers,
         jsonBody: {
-          // KPIs - Updated to map the fixed aliases
           totalPageViews: kpi[0]?.totalViews || 0,
           uniqueUsers: kpi[0]?.uniqueUsers || 0,
           sessions: kpi[0]?.totalSessions || 0,
           
-          // Charts
           hourly: hourly.map(r => ({ t: r.t, n: r.n })),
           daily: daily.map(r => ({ t: r.t, n: r.n })),
           
-          // Tables
           topPages: topPages.map(r => ({ url: r.url, n: r.n })),
           topReferrers: topRefs.map(r => ({ ref: r.ref, n: r.n })),
           geo: geo.map(r => ({ country: r.country, n: r.n })),
           topCities: cities.map(r => ({ city: r.city, n: r.n })),
           slowestPages: slow.map(r => ({ url: r.url, avgMs: r.avgMs })),
           
-          // Tech Bars
           browsers: browsers.map(r => ({ name: r.name, n: r.n })),
           os: os.map(r => ({ name: r.name, n: r.n })),
           deviceTypes: deviceTypes.map(r => ({ name: r.name, n: r.n })),
           devices: devices.map(r => ({ name: r.name, n: r.n })),
           
-          // Health
-          jsErrors: health[0]?.count || 0,
+          jsErrors: health[0]?.errCount || 0,
           avgLoadSpeed: ux[0]?.avgLoadSpeed || 0,
           apdexScore: ux[0]?.apdexScore || 0,
           
-          // The new mapped timeline format
           timeline: feed.map(r => ({ t: r.t, text: r.text, kind: r.kind }))
         },
       };
