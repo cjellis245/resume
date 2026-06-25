@@ -214,7 +214,7 @@
         <header>
             <h1>Christian Ellis</h1>
             <div class="contact-info">
-                <span>📞 021 0813 5646</span>
+                <span>📞 <a href="tel:02108135646">021 0813 5646</a></span>
                 <span>✉️ <a href="mailto:christian.ellis245@icloud.com">christian.ellis245@icloud.com</a></span>
                 <span>🔗 <a href="https://www.linkedin.com/in/cjellisnz" target="_blank">linkedin.com/in/cjellisnz</a></span>
                 <span><a href="/stats">📊 Live stats</a></span> 
@@ -444,6 +444,31 @@
   window.addEventListener('beforeunload', () => {
     navigator.sendBeacon('/api/heartbeat?sid=' + encodeURIComponent(sid) + '&leave=1');
   });
+
+  // --- NEW: Track Engagement & Contact Link Clicks ---
+  document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.contact-info a').forEach(link => {
+          link.addEventListener('click', (e) => {
+              const href = link.getAttribute('href');
+              let actionType = 'Unknown Link Click';
+              
+              if (href.startsWith('mailto:')) actionType = 'Email Clicked';
+              else if (href.startsWith('tel:')) actionType = 'Phone Number Clicked';
+              else if (href.includes('linkedin.com')) actionType = 'LinkedIn Profile Clicked';
+              else if (href.includes('/stats')) actionType = 'Live Stats Viewed';
+
+              if (window.appInsights) {
+                  window.appInsights.trackEvent({
+                      name: 'ResumeEngagement',
+                      properties: { 
+                          details: actionType,
+                          targetUrl: href
+                      }
+                  });
+              }
+          });
+      });
+  });
 })();
 </script>
 
@@ -456,9 +481,15 @@
     const targets = document.querySelectorAll('body > *:not(script):not(style), header, section, main > section');
 
     function executeExplosion() {
-        // Log detonation event directly to Azure App Insights
+        // Log detonation event directly to Azure App Insights with extra details
         if (window.appInsights) {
-            window.appInsights.trackEvent({ name: 'SelfDestructInitiated' });
+            window.appInsights.trackEvent({ 
+                name: 'SelfDestructInitiated',
+                properties: { 
+                    details: 'User triggered manual override',
+                    buttonState: 'Chaos Initiated'
+                }
+            });
         }
 
         // 1. Lock viewports to kill mobile zooming bugs instantly
@@ -511,9 +542,15 @@
     }
 
     function executeRewind() {
-        // Log reconstruction event directly to Azure App Insights
+        // Log reconstruction event directly to Azure App Insights with extra details
         if (window.appInsights) {
-            window.appInsights.trackEvent({ name: 'InfrastructureRebuilt' });
+            window.appInsights.trackEvent({ 
+                name: 'InfrastructureRebuilt',
+                properties: { 
+                    details: 'System successfully restored',
+                    buttonState: 'Rebuild Initiated'
+                }
+            });
         }
 
         btn.onclick = null; // Lock button instantly to prevent multi-click spam glitches
